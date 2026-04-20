@@ -72,11 +72,11 @@ export default function Header() {
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
               <Image
-                src="/logo.png"
+                src="/logo-icon.png"
                 alt="HYDREX Logo"
-                width={44}
-                height={44}
-                className="object-contain"
+                width={48}
+                height={35}
+                className="object-contain drop-shadow-sm"
                 priority
               />
             </motion.div>
@@ -192,11 +192,11 @@ export default function Header() {
                     <SheetHeader className="p-6 pb-4 border-b border-hydrex-light bg-gradient-to-br from-hydrex-deep to-hydrex-ocean">
                       <SheetTitle className="flex items-center gap-3 text-white">
                         <Image
-                          src="/logo.png"
+                          src="/logo-icon.png"
                           alt="HYDREX"
-                          width={40}
-                          height={40}
-                          className="object-contain"
+                          width={44}
+                          height={32}
+                          className="object-contain drop-shadow-sm"
                         />
                         <div className="flex flex-col">
                           <span className="text-lg font-extrabold tracking-wider">HYDREX</span>
