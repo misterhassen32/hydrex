@@ -207,3 +207,33 @@ Stage Summary:
 - Both Zone and Contact sections have subtle background instead of plain white
 - ESLint passed clean, dev server compiling successfully
 ---
+Task ID: 8
+Agent: Main Agent
+Task: Rewrite Zone component with realistic France SVG map
+
+Work Log:
+- Complete rewrite of zone.tsx with much more detailed France SVG map
+- Added realistic France outline path with Brittany peninsula and Corsica
+- 6 departments (34, 30, 84, 11, 66, 13) with more accurate geographic positioning
+- Enhanced hover effects: scale(1.04), brighter fill, stronger glow filter, smooth cubic-bezier transition
+- Premium tooltip on hover showing department number + name + capital with arrow and shadow
+- Major city markers for geographic reference (Paris, Lyon, Toulouse, Bordeaux + dept capitals)
+- Subtle region boundary lines for map context
+- Mediterranean Sea with wave hints and Corsica label
+- Map legend showing department color codes
+- Dotted zone boundary and "ZONE HYDREX" label
+- Right side: descriptive text about intervention zones (no department list)
+- 4 benefit cards (Intervention rapide, Expertise locale, Équipements mobiles, 6 départements)
+- Nationwide coverage mention in dark gradient card with Globe icon
+- CTA button for devis
+- Transparent background with gradient overlay
+- Fixed typo (removed Chinese characters accidentally inserted)
+- ESLint passed clean
+
+Stage Summary:
+- Zone section now has a realistic, detailed France SVG map
+- Interactive departments with premium glow/scale hover effects
+- Tooltip with department info appears on hover
+- Right side has descriptive text + benefits + nationwide mention (no department list)
+- Dev server compiling successfully
+---

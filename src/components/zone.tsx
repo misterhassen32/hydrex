@@ -1,78 +1,102 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { Globe, Phone, MapPin, Clock, Shield, Truck } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Globe, Phone, Clock, Shield, Truck, MapPin } from 'lucide-react'
 import { useState } from 'react'
 
-// Real approximate department boundary paths for Occitanie & PACA regions
-// Based on simplified geographic outlines of French departments
-const deptPaths = [
+// Detailed France outline path (realistic hexagonal shape with Brittany, Normandy, etc.)
+const francePath = 'M188,8 L198,2 L212,0 L226,2 L240,6 L254,8 L264,14 L274,22 L284,32 L292,44 L298,56 L304,66 L310,72 L320,76 L330,74 L340,70 L350,72 L356,80 L360,90 L358,102 L354,112 L350,122 L352,134 L358,146 L362,156 L360,168 L356,178 L354,188 L356,198 L362,210 L368,222 L370,234 L366,246 L362,256 L364,268 L370,278 L374,290 L372,302 L368,312 L370,324 L372,336 L368,348 L362,358 L354,366 L348,374 L342,382 L334,390 L324,396 L314,400 L304,404 L294,406 L284,408 L274,410 L264,412 L254,414 L244,416 L234,416 L224,414 L214,412 L204,408 L194,406 L184,402 L174,396 L164,390 L156,382 L148,372 L140,362 L134,350 L128,338 L122,326 L116,312 L110,298 L104,284 L100,270 L96,256 L90,242 L86,228 L82,214 L80,200 L78,186 L76,172 L78,158 L82,144 L86,130 L90,116 L96,104 L104,92 L112,82 L120,72 L128,62 L138,52 L148,44 L158,36 L168,28 L178,18 Z'
+
+// Brittany peninsula extension
+const brittanyPath = 'M80,200 L72,198 L62,200 L52,204 L44,210 L38,218 L34,228 L32,238 L34,248 L40,256 L48,260 L56,258 L64,252 L72,244 L78,234 L82,224 L82,214 Z'
+
+// Corsica
+const corsicaPath = 'M384,380 L388,374 L392,376 L394,384 L392,394 L388,402 L384,408 L380,410 L376,406 L374,398 L376,390 L380,384 Z'
+
+// Department paths with more accurate geographic positioning
+// Positioned in the south of France based on real department boundaries
+const departments = [
   {
     number: '34',
     name: 'Hérault',
     capital: 'Montpellier',
-    cx: 225,
-    cy: 325,
-    path: 'M195,295 L205,280 L225,275 L245,278 L260,285 L270,300 L275,320 L270,340 L260,355 L245,365 L230,370 L210,368 L195,360 L185,345 L182,325 L185,310 Z',
+    cx: 256,
+    cy: 332,
+    // Hérault - Mediterranean coast, between Aude and Gard
+    path: 'M238,312 L248,304 L260,302 L272,306 L280,314 L284,326 L282,340 L276,352 L266,360 L254,364 L242,360 L234,352 L230,340 L232,326 Z',
   },
   {
     number: '30',
     name: 'Gard',
     capital: 'Nîmes',
-    cx: 280,
-    cy: 310,
-    path: 'M245,278 L260,270 L280,268 L295,275 L305,290 L310,310 L305,330 L295,345 L280,350 L265,348 L255,340 L250,325 L250,310 L248,295 Z',
+    cx: 292,
+    cy: 308,
+    // Gard - north of Bouches-du-Rhône, east of Hérault
+    path: 'M272,290 L284,284 L298,286 L310,294 L318,306 L320,320 L316,334 L306,342 L294,344 L282,340 L276,328 L274,314 L272,302 Z',
   },
   {
     number: '84',
     name: 'Vaucluse',
     capital: 'Avignon',
     cx: 310,
-    cy: 268,
-    path: 'M280,240 L295,232 L315,235 L330,245 L340,260 L340,278 L335,292 L320,300 L305,298 L295,288 L285,275 L278,260 Z',
+    cy: 270,
+    // Vaucluse - north of Bouches-du-Rhône
+    path: 'M294,252 L308,246 L322,250 L334,260 L340,274 L336,288 L326,298 L312,300 L300,296 L292,284 L290,270 Z',
   },
   {
     number: '11',
     name: 'Aude',
     capital: 'Carcassonne',
-    cx: 165,
-    cy: 335,
-    path: 'M140,310 L155,298 L175,292 L195,295 L200,310 L205,325 L200,340 L195,355 L180,368 L160,375 L140,370 L125,355 L120,335 L125,320 Z',
+    cx: 218,
+    cy: 338,
+    // Aude - between Pyrénées-Orientales and Hérault
+    path: 'M200,318 L212,310 L226,308 L238,312 L242,324 L240,338 L236,352 L226,362 L214,366 L202,360 L194,350 L190,336 Z',
   },
   {
     number: '66',
     name: 'Pyrénées-Orientales',
     capital: 'Perpignan',
-    cx: 110,
+    cx: 186,
     cy: 370,
-    path: 'M95,340 L115,325 L140,310 L145,325 L150,345 L148,365 L140,385 L130,400 L115,410 L95,412 L78,400 L70,380 L72,360 L80,345 Z',
+    // Pyrénées-Orientales - southwestern, Spanish border
+    path: 'M170,350 L184,342 L200,340 L210,350 L214,364 L210,380 L202,394 L190,404 L178,408 L166,402 L158,390 L156,376 L160,362 Z',
   },
   {
     number: '13',
     name: 'Bouches-du-Rhône',
     capital: 'Marseille',
-    cx: 335,
-    cy: 325,
-    path: 'M305,290 L320,280 L340,278 L355,288 L365,305 L368,325 L360,345 L348,358 L330,365 L315,360 L305,348 L298,330 L295,310 Z',
+    cx: 338,
+    cy: 332,
+    // Bouches-du-Rhône - Mediterranean coast, around Marseille
+    path: 'M320,312 L334,304 L348,308 L360,318 L368,332 L366,348 L358,360 L346,368 L332,370 L320,364 L312,352 L310,338 L314,324 Z',
   },
 ]
 
-// Simplified France hexagonal outline path
-const franceOutline = 'M100,40 L145,22 L200,15 L255,18 L305,28 L345,55 L370,92 L380,135 L375,180 L365,215 L370,255 L360,290 L350,315 L355,350 L345,375 L325,395 L295,405 L265,410 L235,415 L200,420 L160,415 L120,405 L90,390 L75,365 L65,330 L60,290 L55,250 L45,205 L40,165 L47,125 L60,85 L77,58 Z'
+// Major city markers for geographic reference
+const cities = [
+  { name: 'Paris', x: 262, y: 82, dept: false },
+  { name: 'Lyon', x: 310, y: 208, dept: false },
+  { name: 'Toulouse', x: 190, y: 284, dept: false },
+  { name: 'Bordeaux', x: 130, y: 260, dept: false },
+  { name: 'Marseille', x: 340, y: 348, dept: true },
+  { name: 'Montpellier', x: 256, y: 348, dept: true },
+  { name: 'Nîmes', x: 292, y: 322, dept: true },
+  { name: 'Avignon', x: 312, y: 282, dept: true },
+  { name: 'Perpignan', x: 186, y: 382, dept: true },
+  { name: 'Carcassonne', x: 218, y: 352, dept: true },
+]
 
 export default function Zone() {
   const [hoveredDept, setHoveredDept] = useState<string | null>(null)
-
-  const hoveredDeptInfo = deptPaths.find(d => d.number === hoveredDept)
+  const hoveredInfo = departments.find(d => d.number === hoveredDept)
 
   return (
     <section id="zone-intervention" className="py-20 md:py-28 relative overflow-hidden">
-      {/* Background image with high transparency to avoid white */}
+      {/* Transparent background */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.06]"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.05]"
         style={{ backgroundImage: "url('/water-tech-bg.png')" }}
       />
-      {/* Light blue tint overlay instead of plain white */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#f5f9ff] via-white to-[#f0f4ff]" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -101,15 +125,15 @@ export default function Zone() {
           </p>
         </motion.div>
 
-        {/* Two-column layout: Map + Descriptive text */}
+        {/* Map + Text layout */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center"
         >
-          {/* SVG France Map */}
+          {/* France SVG Map */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -117,19 +141,19 @@ export default function Zone() {
             transition={{ duration: 0.7, ease: 'easeOut' }}
             className="relative"
           >
-            <div className="bg-gradient-to-br from-[#f5f9ff] to-[#e3f2fd] rounded-2xl p-6 md:p-8 shadow-lg border border-[#e3f2fd]">
+            <div className="bg-gradient-to-br from-[#f5f9ff] to-[#e3f2fd] rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl border border-[#e3f2fd]/80">
               <svg
-                viewBox="0 0 420 450"
+                viewBox="0 0 420 440"
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-auto max-h-[500px]"
+                className="w-full h-auto"
                 role="img"
-                aria-label="Carte de France montrant les départements d'intervention HYDREX"
+                aria-label="Carte de France avec les départements d'intervention HYDREX mis en valeur"
               >
                 <defs>
-                  {/* Blue glow filter for highlighted departments */}
-                  <filter id="dept-glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="4" result="blur" />
-                    <feFlood floodColor="#1976d2" floodOpacity="0.5" result="color" />
+                  {/* Glow for departments */}
+                  <filter id="glow-default" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feFlood floodColor="#1976d2" floodOpacity="0.45" result="color" />
                     <feComposite in="color" in2="blur" operator="in" result="shadow" />
                     <feMerge>
                       <feMergeNode in="shadow" />
@@ -137,10 +161,10 @@ export default function Zone() {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
-                  {/* Stronger glow on hover */}
-                  <filter id="dept-glow-hover" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="7" result="blur" />
-                    <feFlood floodColor="#42a5f5" floodOpacity="0.8" result="color" />
+                  {/* Strong glow on hover */}
+                  <filter id="glow-hover" x="-60%" y="-60%" width="220%" height="220%">
+                    <feGaussianBlur stdDeviation="6" result="blur" />
+                    <feFlood floodColor="#42a5f5" floodOpacity="0.75" result="color" />
                     <feComposite in="color" in2="blur" operator="in" result="shadow" />
                     <feMerge>
                       <feMergeNode in="shadow" />
@@ -149,96 +173,112 @@ export default function Zone() {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
-                  {/* Subtle drop shadow for France outline */}
-                  <filter id="outline-shadow" x="-5%" y="-5%" width="110%" height="110%">
-                    <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#0a2540" floodOpacity="0.08" />
+                  {/* France outline shadow */}
+                  <filter id="france-shadow" x="-3%" y="-3%" width="106%" height="106%">
+                    <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#0a2540" floodOpacity="0.06" />
                   </filter>
-                  {/* Pulse animation for departments */}
-                  <style>{`
-                    .dept-zone {
-                      transition: all 0.3s ease;
-                      cursor: pointer;
-                    }
-                    .dept-zone:hover {
-                      filter: url(#dept-glow-hover);
-                    }
-                    .dept-label {
-                      pointer-events: none;
-                      transition: all 0.3s ease;
-                    }
-                    @keyframes dept-pulse {
-                      0%, 100% { opacity: 0.7; }
-                      50% { opacity: 1; }
-                    }
-                  `}</style>
+                  {/* Tooltip shadow */}
+                  <filter id="tooltip-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                    <feDropShadow dx="0" dy="3" stdDeviation="5" floodColor="#0a2540" floodOpacity="0.25" />
+                  </filter>
                 </defs>
 
-                {/* France outline */}
+                {/* France mainland outline */}
                 <path
-                  d={franceOutline}
-                  fill="#f5f9ff"
+                  d={francePath}
+                  fill="white"
                   stroke="#c5cae9"
                   strokeWidth="1.5"
-                  filter="url(#outline-shadow)"
+                  filter="url(#france-shadow)"
                 />
 
-                {/* Internal region boundaries hint */}
-                <g opacity="0.15" stroke="#b0bec5" strokeWidth="0.5" fill="none">
-                  <line x1="100" y1="150" x2="350" y2="160" />
-                  <line x1="110" y1="220" x2="360" y2="230" />
-                  <line x1="80" y1="300" x2="370" y2="310" />
-                  <line x1="200" y1="100" x2="200" y2="400" />
-                  <line x1="280" y1="80" x2="280" y2="380" />
+                {/* Brittany peninsula */}
+                <path
+                  d={brittanyPath}
+                  fill="white"
+                  stroke="#c5cae9"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+
+                {/* Corsica */}
+                <path
+                  d={corsicaPath}
+                  fill="white"
+                  stroke="#c5cae9"
+                  strokeWidth="1.2"
+                />
+                <text x="384" y="418" textAnchor="middle" fill="#90caf9" fontSize="7" fontStyle="italic" fontFamily="Inter, sans-serif">Corse</text>
+
+                {/* Subtle region boundary lines for context */}
+                <g opacity="0.08" stroke="#78909c" strokeWidth="0.5" fill="none">
+                  {/* Horizontal divides */}
+                  <path d="M90,140 Q200,138 355,144" />
+                  <path d="M80,200 Q190,196 360,204" />
+                  <path d="M70,260 Q180,256 365,264" />
+                  <path d="M90,310 Q195,306 370,314" />
+                  {/* Vertical divides */}
+                  <path d="M180,50 Q176,200 184,400" />
+                  <path d="M260,30 Q258,180 266,380" />
+                  <path d="M330,60 Q328,190 336,370" />
                 </g>
 
-                {/* Paris marker */}
-                <circle cx="235" cy="110" r="3.5" fill="#0a2540" opacity="0.25" />
-                <text
-                  x="235"
-                  y="100"
-                  textAnchor="middle"
-                  fill="#0a2540"
-                  fontSize="9"
-                  fontWeight="600"
-                  fontFamily="Inter, sans-serif"
-                  opacity="0.3"
-                >
-                  Paris
-                </text>
+                {/* Major non-dept cities - subtle markers */}
+                {cities.filter(c => !c.dept).map(city => (
+                  <g key={city.name}>
+                    <circle cx={city.x} cy={city.y} r="2.5" fill="#0a2540" opacity="0.2" />
+                    <text
+                      x={city.x}
+                      y={city.y - 8}
+                      textAnchor="middle"
+                      fill="#0a2540"
+                      fontSize="7"
+                      fontWeight="500"
+                      fontFamily="Inter, sans-serif"
+                      opacity="0.3"
+                    >
+                      {city.name}
+                    </text>
+                  </g>
+                ))}
 
                 {/* Highlighted department zones */}
-                {deptPaths.map((dept) => {
+                {departments.map((dept) => {
                   const isHovered = hoveredDept === dept.number
                   return (
                     <g key={dept.number}>
-                      {/* Department shape with glow */}
+                      {/* Department shape */}
                       <path
                         d={dept.path}
                         fill={isHovered ? '#42a5f5' : '#1976d2'}
                         stroke={isHovered ? '#64b5f6' : '#0d47a1'}
-                        strokeWidth="1.2"
-                        filter={isHovered ? 'url(#dept-glow-hover)' : 'url(#dept-glow)'}
-                        className="dept-zone"
+                        strokeWidth={isHovered ? '2' : '1.2'}
+                        filter={isHovered ? 'url(#glow-hover)' : 'url(#glow-default)'}
+                        style={{
+                          cursor: 'pointer',
+                          transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                          opacity: isHovered ? 1 : 0.9,
+                          transform: isHovered ? 'scale(1.04)' : 'scale(1)',
+                          transformOrigin: `${dept.cx}px ${dept.cy}px`,
+                        }}
                         onMouseEnter={() => setHoveredDept(dept.number)}
                         onMouseLeave={() => setHoveredDept(null)}
-                        style={{
-                          opacity: isHovered ? 1 : 0.85,
-                          transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-                          transformOrigin: 'center',
-                          transformBox: 'fill-box',
-                        }}
                       />
-                      {/* Department number label */}
+                      {/* Department number */}
                       <text
                         x={dept.cx}
-                        y={dept.cy}
+                        y={dept.cy - 2}
                         textAnchor="middle"
                         dominantBaseline="central"
                         fill="white"
-                        fontSize="13"
-                        fontWeight="700"
+                        fontSize="12"
+                        fontWeight="800"
                         fontFamily="Inter, sans-serif"
-                        className="dept-label"
+                        style={{
+                          pointerEvents: 'none',
+                          transition: 'all 0.35s ease',
+                          textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                        }}
                       >
                         {dept.number}
                       </text>
@@ -246,56 +286,124 @@ export default function Zone() {
                   )
                 })}
 
-                {/* Hover tooltip */}
-                {hoveredDeptInfo && (
-                  <g>
-                    <rect
-                      x={hoveredDeptInfo.cx - 60}
-                      y={hoveredDeptInfo.cy - 45}
-                      width="120"
-                      height="26"
-                      rx="6"
-                      fill="#0a2540"
-                      opacity="0.92"
-                    />
-                    <text
-                      x={hoveredDeptInfo.cx}
-                      y={hoveredDeptInfo.cy - 28}
-                      textAnchor="middle"
+                {/* Dept city markers */}
+                {cities.filter(c => c.dept).map(city => (
+                  <g key={city.name}>
+                    <circle
+                      cx={city.x}
+                      cy={city.y}
+                      r="2"
                       fill="white"
-                      fontSize="11"
-                      fontWeight="600"
-                      fontFamily="Inter, sans-serif"
-                    >
-                      {hoveredDeptInfo.number} - {hoveredDeptInfo.name}
-                    </text>
+                      stroke="#0d47a1"
+                      strokeWidth="0.8"
+                      opacity="0.7"
+                    />
                   </g>
-                )}
+                ))}
 
-                {/* Mediterranean Sea */}
+                {/* Hover tooltip */}
+                <AnimatePresence>
+                  {hoveredInfo && (
+                    <g key={hoveredInfo.number}>
+                      {/* Tooltip background with rounded corners */}
+                      <rect
+                        x={hoveredInfo.cx - 72}
+                        y={hoveredInfo.cy - 52}
+                        width="144"
+                        height="36"
+                        rx="8"
+                        fill="#0a2540"
+                        filter="url(#tooltip-shadow)"
+                        opacity="0.95"
+                      />
+                      {/* Tooltip arrow */}
+                      <polygon
+                        points={`${hoveredInfo.cx - 6},${hoveredInfo.cy - 16} ${hoveredInfo.cx + 6},${hoveredInfo.cy - 16} ${hoveredInfo.cx},${hoveredInfo.cy - 10}`}
+                        fill="#0a2540"
+                        opacity="0.95"
+                      />
+                      {/* Tooltip text line 1: Department number + name */}
+                      <text
+                        x={hoveredInfo.cx}
+                        y={hoveredInfo.cy - 38}
+                        textAnchor="middle"
+                        fill="white"
+                        fontSize="11"
+                        fontWeight="700"
+                        fontFamily="Inter, sans-serif"
+                      >
+                        {hoveredInfo.number} — {hoveredInfo.name}
+                      </text>
+                      {/* Tooltip text line 2: Capital */}
+                      <text
+                        x={hoveredInfo.cx}
+                        y={hoveredInfo.cy - 24}
+                        textAnchor="middle"
+                        fill="#42a5f5"
+                        fontSize="9"
+                        fontWeight="500"
+                        fontFamily="Inter, sans-serif"
+                      >
+                        {hoveredInfo.capital}
+                      </text>
+                    </g>
+                  )}
+                </AnimatePresence>
+
+                {/* Mediterranean Sea label */}
                 <text
-                  x="240"
-                  y="438"
+                  x="290"
+                  y="424"
                   textAnchor="middle"
                   fill="#90caf9"
-                  fontSize="11"
+                  fontSize="9"
                   fontStyle="italic"
                   fontFamily="Inter, sans-serif"
+                  opacity="0.7"
                 >
                   Méditerranée
                 </text>
-                <path d="M160,422 Q180,416 200,422 Q220,428 240,422 Q260,416 280,422" fill="none" stroke="#bbdefb" strokeWidth="1" opacity="0.5" />
+                {/* Sea waves */}
+                <path d="M220,416 Q240,410 260,416 Q280,422 300,416 Q320,410 340,416" fill="none" stroke="#bbdefb" strokeWidth="0.8" opacity="0.4" />
+                <path d="M230,426 Q250,420 270,426 Q290,432 310,426 Q330,420 350,426" fill="none" stroke="#bbdefb" strokeWidth="0.6" opacity="0.25" />
 
-                {/* Dotted boundary around zone */}
+                {/* Dotted zone boundary */}
                 <path
-                  d="M72,355 Q75,310 120,290 Q170,275 230,268 Q290,272 340,280 Q365,290 370,330 Q370,370 345,385 Q310,400 265,410 Q210,415 155,405 Q100,395 78,375 Z"
+                  d="M158,370 Q155,338 170,318 Q188,300 218,290 Q250,282 282,280 Q314,282 340,290 Q364,300 370,326 Q372,356 360,370 Q344,386 322,396 Q290,406 254,410 Q218,410 192,400 Q166,390 158,370 Z"
                   fill="none"
                   stroke="#42a5f5"
-                  strokeWidth="1.5"
-                  strokeDasharray="5 5"
-                  opacity="0.35"
+                  strokeWidth="1.2"
+                  strokeDasharray="4 4"
+                  opacity="0.3"
                 />
+
+                {/* HYDREX zone label */}
+                <text
+                  x="260"
+                  y="296"
+                  textAnchor="middle"
+                  fill="#0d47a1"
+                  fontSize="8"
+                  fontWeight="700"
+                  fontFamily="Inter, sans-serif"
+                  opacity="0.2"
+                  letterSpacing="3"
+                >
+                  ZONE HYDREX
+                </text>
               </svg>
+            </div>
+
+            {/* Map legend */}
+            <div className="flex items-center justify-center gap-6 mt-4 text-xs text-[#0a2540]/60">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 rounded-sm bg-[#1976d2]" />
+                <span>Départements couverts</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 rounded-sm bg-[#42a5f5]" />
+                <span>Survolez pour découvrir</span>
+              </div>
             </div>
           </motion.div>
 
@@ -305,89 +413,96 @@ export default function Zone() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-7"
           >
             {/* Zone description */}
             <div>
               <h3 className="text-2xl font-bold text-[#0a2540] mb-4">
-                Notre cœur d&apos;activité
+                Notre zone d&apos;intervention principale
               </h3>
               <p className="text-[#0a2540]/80 leading-relaxed mb-4">
-                HYDREX intervient en priorité dans le <strong className="text-[#0a2540]">sud de la France</strong>, 
-                couvrant les départements de l&apos;Hérault (34), du Gard (30), du Vaucluse (84), 
-                de l&apos;Aude (11), des Pyrénées-Orientales (66) et des Bouches-du-Rhône (13).
+                HYDREX est implanté au cœur du <strong className="text-[#0a2540]">sud de la France</strong>, 
+                avec une couverture dédiée des départements de l&apos;Hérault (34), du Gard (30), 
+                du Vaucluse (84), de l&apos;Aude (11), des Pyrénées-Orientales (66) et des 
+                Bouches-du-Rhône (13).
               </p>
               <p className="text-[#0a2540]/80 leading-relaxed mb-4">
-                Notre <strong className="text-[#0a2540]">implantation locale</strong> nous garantit 
-                des temps d&apos;intervention courts et une connaissance approfondie des réseaux 
-                d&apos;assainissement de la région.
+                Notre <strong className="text-[#0a2540]">proximité géographique</strong> avec les 
+                grandes agglomérations — Montpellier, Nîmes, Avignon, Carcassonne, Perpignan et 
+                Marseille — nous permet d&apos;intervenir rapidement sur l&apos;ensemble de la région 
+                Occitanie et PACA.
               </p>
               <p className="text-[#0a2540]/80 leading-relaxed">
-                Nos équipes sont basées à proximité des principales agglomérations — Montpellier, 
-                Nîmes, Avignon, Carcassonne, Perpignan et Marseille — pour une 
-                <strong className="text-[#0a2540]"> réactivité maximale</strong> face à vos urgences.
+                Nos équipes connaissent parfaitement les <strong className="text-[#0a2540]">réseaux 
+                d&apos;assainissement locaux</strong>, les réglementations en vigueur et les 
+                spécificités de chaque commune pour vous garantir un service adapté et réactif.
               </p>
             </div>
 
             {/* Key benefits */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd]">
-                <div className="w-10 h-10 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-5 h-5 text-[#1976d2]" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd] hover:shadow-md transition-shadow">
+                <div className="w-9 h-9 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-4 h-4 text-[#1976d2]" />
                 </div>
                 <div>
                   <p className="font-semibold text-[#0a2540] text-sm">Intervention rapide</p>
                   <p className="text-[#0a2540]/60 text-xs">Sur place en moins de 2h</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd]">
-                <div className="w-10 h-10 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-5 h-5 text-[#1976d2]" />
+              <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd] hover:shadow-md transition-shadow">
+                <div className="w-9 h-9 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-4 h-4 text-[#1976d2]" />
                 </div>
                 <div>
                   <p className="font-semibold text-[#0a2540] text-sm">Expertise locale</p>
                   <p className="text-[#0a2540]/60 text-xs">Connaissance des réseaux</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd]">
-                <div className="w-10 h-10 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
-                  <Truck className="w-5 h-5 text-[#1976d2]" />
+              <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd] hover:shadow-md transition-shadow">
+                <div className="w-9 h-9 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
+                  <Truck className="w-4 h-4 text-[#1976d2]" />
                 </div>
                 <div>
                   <p className="font-semibold text-[#0a2540] text-sm">Équipements mobiles</p>
                   <p className="text-[#0a2540]/60 text-xs">Camions haute pression</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd]">
-                <div className="w-10 h-10 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-[#1976d2]" />
+              <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd] hover:shadow-md transition-shadow">
+                <div className="w-9 h-9 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-4 h-4 text-[#1976d2]" />
                 </div>
                 <div>
                   <p className="font-semibold text-[#0a2540] text-sm">6 départements</p>
-                  <p className="text-[#0a2540]/60 text-xs">Couverture régionale</p>
+                  <p className="text-[#0a2540]/60 text-xs">Occitanie &amp; PACA</p>
                 </div>
               </div>
             </div>
 
             {/* Nationwide mention */}
-            <div className="bg-gradient-to-r from-[#0a2540] to-[#0d47a1] rounded-xl p-5 text-white">
-              <div className="flex items-start gap-3">
-                <Globe className="w-6 h-6 text-[#42a5f5] flex-shrink-0 mt-0.5" />
+            <div className="bg-gradient-to-r from-[#0a2540] to-[#0d47a1] rounded-2xl p-6 text-white relative overflow-hidden">
+              {/* Decorative glow */}
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#42a5f5]/10 rounded-full blur-2xl" />
+              <div className="relative flex items-start gap-4">
+                <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <Globe className="w-6 h-6 text-[#42a5f5]" />
+                </div>
                 <div>
-                  <p className="font-semibold mb-1">Intervention sur toute la France</p>
+                  <p className="font-bold text-lg mb-2">Intervention sur toute la France</p>
                   <p className="text-white/70 text-sm leading-relaxed">
-                    Au-delà de notre zone principale, HYDREX se déplace sur l&apos;ensemble du territoire 
-                    français pour des interventions spécifiques ou des contrats d&apos;entretien. 
-                    Contactez-nous pour étudier votre besoin.
+                    Au-delà de notre zone principale, HYDREX se déplace sur l&apos;ensemble 
+                    du territoire français pour des interventions spécifiques ou des contrats 
+                    d&apos;entretien. Nos camions haute pression et nos équipes qualifiées sont 
+                    prêts à intervenir où que vous soyez.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Quick CTA */}
+            {/* CTA */}
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 text-[#1976d2] font-semibold hover:text-[#0d47a1] transition-colors group"
+              className="inline-flex items-center gap-2 bg-[#0d47a1] hover:bg-[#0a2540] text-white font-semibold px-6 py-3.5 rounded-xl transition-colors shadow-lg shadow-[#0d47a1]/20 group"
             >
               <Phone className="w-4 h-4" />
               Demander un devis gratuit
