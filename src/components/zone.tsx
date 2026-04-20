@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Globe, Phone, Clock, Shield, Truck, MapPin } from 'lucide-react'
 import { useState } from 'react'
 
@@ -13,8 +13,7 @@ const brittanyPath = 'M80,200 L72,198 L62,200 L52,204 L44,210 L38,218 L34,228 L3
 // Corsica
 const corsicaPath = 'M384,380 L388,374 L392,376 L394,384 L392,394 L388,402 L384,408 L380,410 L376,406 L374,398 L376,390 L380,384 Z'
 
-// Department paths with more accurate geographic positioning
-// Positioned in the south of France based on real department boundaries
+// Department paths with accurate geographic positioning
 const departments = [
   {
     number: '34',
@@ -22,7 +21,6 @@ const departments = [
     capital: 'Montpellier',
     cx: 256,
     cy: 332,
-    // Hérault - Mediterranean coast, between Aude and Gard
     path: 'M238,312 L248,304 L260,302 L272,306 L280,314 L284,326 L282,340 L276,352 L266,360 L254,364 L242,360 L234,352 L230,340 L232,326 Z',
   },
   {
@@ -31,7 +29,6 @@ const departments = [
     capital: 'Nîmes',
     cx: 292,
     cy: 308,
-    // Gard - north of Bouches-du-Rhône, east of Hérault
     path: 'M272,290 L284,284 L298,286 L310,294 L318,306 L320,320 L316,334 L306,342 L294,344 L282,340 L276,328 L274,314 L272,302 Z',
   },
   {
@@ -40,7 +37,6 @@ const departments = [
     capital: 'Avignon',
     cx: 310,
     cy: 270,
-    // Vaucluse - north of Bouches-du-Rhône
     path: 'M294,252 L308,246 L322,250 L334,260 L340,274 L336,288 L326,298 L312,300 L300,296 L292,284 L290,270 Z',
   },
   {
@@ -49,7 +45,6 @@ const departments = [
     capital: 'Carcassonne',
     cx: 218,
     cy: 338,
-    // Aude - between Pyrénées-Orientales and Hérault
     path: 'M200,318 L212,310 L226,308 L238,312 L242,324 L240,338 L236,352 L226,362 L214,366 L202,360 L194,350 L190,336 Z',
   },
   {
@@ -58,7 +53,6 @@ const departments = [
     capital: 'Perpignan',
     cx: 186,
     cy: 370,
-    // Pyrénées-Orientales - southwestern, Spanish border
     path: 'M170,350 L184,342 L200,340 L210,350 L214,364 L210,380 L202,394 L190,404 L178,408 L166,402 L158,390 L156,376 L160,362 Z',
   },
   {
@@ -67,23 +61,22 @@ const departments = [
     capital: 'Marseille',
     cx: 338,
     cy: 332,
-    // Bouches-du-Rhône - Mediterranean coast, around Marseille
     path: 'M320,312 L334,304 L348,308 L360,318 L368,332 L366,348 L358,360 L346,368 L332,370 L320,364 L312,352 L310,338 L314,324 Z',
   },
 ]
 
 // Major city markers for geographic reference
 const cities = [
-  { name: 'Paris', x: 262, y: 82, dept: false },
-  { name: 'Lyon', x: 310, y: 208, dept: false },
-  { name: 'Toulouse', x: 190, y: 284, dept: false },
-  { name: 'Bordeaux', x: 130, y: 260, dept: false },
-  { name: 'Marseille', x: 340, y: 348, dept: true },
-  { name: 'Montpellier', x: 256, y: 348, dept: true },
-  { name: 'Nîmes', x: 292, y: 322, dept: true },
-  { name: 'Avignon', x: 312, y: 282, dept: true },
-  { name: 'Perpignan', x: 186, y: 382, dept: true },
-  { name: 'Carcassonne', x: 218, y: 352, dept: true },
+  { name: 'Paris', x: 262, y: 82, isDept: false },
+  { name: 'Lyon', x: 310, y: 208, isDept: false },
+  { name: 'Toulouse', x: 190, y: 284, isDept: false },
+  { name: 'Bordeaux', x: 130, y: 260, isDept: false },
+  { name: 'Marseille', x: 340, y: 348, isDept: true },
+  { name: 'Montpellier', x: 256, y: 348, isDept: true },
+  { name: 'Nîmes', x: 292, y: 322, isDept: true },
+  { name: 'Avignon', x: 312, y: 282, isDept: true },
+  { name: 'Perpignan', x: 186, y: 382, isDept: true },
+  { name: 'Carcassonne', x: 218, y: 352, isDept: true },
 ]
 
 export default function Zone() {
@@ -147,10 +140,9 @@ export default function Zone() {
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-full h-auto"
                 role="img"
-                aria-label="Carte de France avec les départements d'intervention HYDREX mis en valeur"
+                aria-label="Carte de France avec les départements d'intervention HYDREX"
               >
                 <defs>
-                  {/* Glow for departments */}
                   <filter id="glow-default" x="-40%" y="-40%" width="180%" height="180%">
                     <feGaussianBlur stdDeviation="3" result="blur" />
                     <feFlood floodColor="#1976d2" floodOpacity="0.45" result="color" />
@@ -161,7 +153,6 @@ export default function Zone() {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
-                  {/* Strong glow on hover */}
                   <filter id="glow-hover" x="-60%" y="-60%" width="220%" height="220%">
                     <feGaussianBlur stdDeviation="6" result="blur" />
                     <feFlood floodColor="#42a5f5" floodOpacity="0.75" result="color" />
@@ -173,13 +164,8 @@ export default function Zone() {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
-                  {/* France outline shadow */}
                   <filter id="france-shadow" x="-3%" y="-3%" width="106%" height="106%">
                     <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#0a2540" floodOpacity="0.06" />
-                  </filter>
-                  {/* Tooltip shadow */}
-                  <filter id="tooltip-shadow" x="-10%" y="-10%" width="120%" height="120%">
-                    <feDropShadow dx="0" dy="3" stdDeviation="5" floodColor="#0a2540" floodOpacity="0.25" />
                   </filter>
                 </defs>
 
@@ -212,19 +198,17 @@ export default function Zone() {
 
                 {/* Subtle region boundary lines for context */}
                 <g opacity="0.08" stroke="#78909c" strokeWidth="0.5" fill="none">
-                  {/* Horizontal divides */}
                   <path d="M90,140 Q200,138 355,144" />
                   <path d="M80,200 Q190,196 360,204" />
                   <path d="M70,260 Q180,256 365,264" />
                   <path d="M90,310 Q195,306 370,314" />
-                  {/* Vertical divides */}
                   <path d="M180,50 Q176,200 184,400" />
                   <path d="M260,30 Q258,180 266,380" />
                   <path d="M330,60 Q328,190 336,370" />
                 </g>
 
                 {/* Major non-dept cities - subtle markers */}
-                {cities.filter(c => !c.dept).map(city => (
+                {cities.filter(c => !c.isDept).map(city => (
                   <g key={city.name}>
                     <circle cx={city.x} cy={city.y} r="2.5" fill="#0a2540" opacity="0.2" />
                     <text
@@ -247,7 +231,6 @@ export default function Zone() {
                   const isHovered = hoveredDept === dept.number
                   return (
                     <g key={dept.number}>
-                      {/* Department shape */}
                       <path
                         d={dept.path}
                         fill={isHovered ? '#42a5f5' : '#1976d2'}
@@ -258,16 +241,13 @@ export default function Zone() {
                           cursor: 'pointer',
                           transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
                           opacity: isHovered ? 1 : 0.9,
-                          transform: isHovered ? 'scale(1.04)' : 'scale(1)',
-                          transformOrigin: `${dept.cx}px ${dept.cy}px`,
                         }}
                         onMouseEnter={() => setHoveredDept(dept.number)}
                         onMouseLeave={() => setHoveredDept(null)}
                       />
-                      {/* Department number */}
                       <text
                         x={dept.cx}
-                        y={dept.cy - 2}
+                        y={dept.cy}
                         textAnchor="middle"
                         dominantBaseline="central"
                         fill="white"
@@ -277,7 +257,6 @@ export default function Zone() {
                         style={{
                           pointerEvents: 'none',
                           transition: 'all 0.35s ease',
-                          textShadow: '0 1px 3px rgba(0,0,0,0.3)',
                         }}
                       >
                         {dept.number}
@@ -287,7 +266,7 @@ export default function Zone() {
                 })}
 
                 {/* Dept city markers */}
-                {cities.filter(c => c.dept).map(city => (
+                {cities.filter(c => c.isDept).map(city => (
                   <g key={city.name}>
                     <circle
                       cx={city.x}
@@ -301,56 +280,49 @@ export default function Zone() {
                   </g>
                 ))}
 
-                {/* Hover tooltip */}
-                <AnimatePresence>
-                  {hoveredInfo && (
-                    <g key={hoveredInfo.number}>
-                      {/* Tooltip background with rounded corners */}
-                      <rect
-                        x={hoveredInfo.cx - 72}
-                        y={hoveredInfo.cy - 52}
-                        width="144"
-                        height="36"
-                        rx="8"
-                        fill="#0a2540"
-                        filter="url(#tooltip-shadow)"
-                        opacity="0.95"
-                      />
-                      {/* Tooltip arrow */}
-                      <polygon
-                        points={`${hoveredInfo.cx - 6},${hoveredInfo.cy - 16} ${hoveredInfo.cx + 6},${hoveredInfo.cy - 16} ${hoveredInfo.cx},${hoveredInfo.cy - 10}`}
-                        fill="#0a2540"
-                        opacity="0.95"
-                      />
-                      {/* Tooltip text line 1: Department number + name */}
-                      <text
-                        x={hoveredInfo.cx}
-                        y={hoveredInfo.cy - 38}
-                        textAnchor="middle"
-                        fill="white"
-                        fontSize="11"
-                        fontWeight="700"
-                        fontFamily="Inter, sans-serif"
-                      >
-                        {hoveredInfo.number} — {hoveredInfo.name}
-                      </text>
-                      {/* Tooltip text line 2: Capital */}
-                      <text
-                        x={hoveredInfo.cx}
-                        y={hoveredInfo.cy - 24}
-                        textAnchor="middle"
-                        fill="#42a5f5"
-                        fontSize="9"
-                        fontWeight="500"
-                        fontFamily="Inter, sans-serif"
-                      >
-                        {hoveredInfo.capital}
-                      </text>
-                    </g>
-                  )}
-                </AnimatePresence>
+                {/* Hover tooltip - simple conditional, no AnimatePresence */}
+                {hoveredInfo && (
+                  <g>
+                    <rect
+                      x={hoveredInfo.cx - 72}
+                      y={hoveredInfo.cy - 55}
+                      width="144"
+                      height="40"
+                      rx="8"
+                      fill="#0a2540"
+                      opacity="0.95"
+                    />
+                    <polygon
+                      points={`${hoveredInfo.cx - 5},${hoveredInfo.cy - 15} ${hoveredInfo.cx + 5},${hoveredInfo.cy - 15} ${hoveredInfo.cx},${hoveredInfo.cy - 9}`}
+                      fill="#0a2540"
+                      opacity="0.95"
+                    />
+                    <text
+                      x={hoveredInfo.cx}
+                      y={hoveredInfo.cy - 38}
+                      textAnchor="middle"
+                      fill="white"
+                      fontSize="11"
+                      fontWeight="700"
+                      fontFamily="Inter, sans-serif"
+                    >
+                      {hoveredInfo.number} — {hoveredInfo.name}
+                    </text>
+                    <text
+                      x={hoveredInfo.cx}
+                      y={hoveredInfo.cy - 23}
+                      textAnchor="middle"
+                      fill="#42a5f5"
+                      fontSize="9"
+                      fontWeight="500"
+                      fontFamily="Inter, sans-serif"
+                    >
+                      {hoveredInfo.capital}
+                    </text>
+                  </g>
+                )}
 
-                {/* Mediterranean Sea label */}
+                {/* Mediterranean Sea */}
                 <text
                   x="290"
                   y="424"
@@ -363,7 +335,6 @@ export default function Zone() {
                 >
                   Méditerranée
                 </text>
-                {/* Sea waves */}
                 <path d="M220,416 Q240,410 260,416 Q280,422 300,416 Q320,410 340,416" fill="none" stroke="#bbdefb" strokeWidth="0.8" opacity="0.4" />
                 <path d="M230,426 Q250,420 270,426 Q290,432 310,426 Q330,420 350,426" fill="none" stroke="#bbdefb" strokeWidth="0.6" opacity="0.25" />
 
@@ -387,7 +358,6 @@ export default function Zone() {
                   fontWeight="700"
                   fontFamily="Inter, sans-serif"
                   opacity="0.2"
-                  letterSpacing="3"
                 >
                   ZONE HYDREX
                 </text>
@@ -481,7 +451,6 @@ export default function Zone() {
 
             {/* Nationwide mention */}
             <div className="bg-gradient-to-r from-[#0a2540] to-[#0d47a1] rounded-2xl p-6 text-white relative overflow-hidden">
-              {/* Decorative glow */}
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#42a5f5]/10 rounded-full blur-2xl" />
               <div className="relative flex items-start gap-4">
                 <div className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
