@@ -45,15 +45,7 @@ export default function Professionals() {
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, ease: 'easeOut' }}
           >
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-[#1976d2] font-semibold text-sm uppercase tracking-wider mb-3"
-            >
-              Cible B2B
-            </motion.p>
+
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0a2540] mb-2">
               Professionnels &amp; Restaurants
             </h2>
@@ -132,8 +124,8 @@ export default function Professionals() {
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
               <Image
-                src="/pro-kitchen-detail.png"
-                alt="Cuisine de restaurant professionnel entretenue par HYDREX"
+                src="/clean-kitchen-pipes.png"
+                alt="Canalisations propres dans une cuisine professionnelle entretenue par HYDREX"
                 width={640}
                 height={480}
                 className="w-full h-auto object-cover"

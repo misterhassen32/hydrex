@@ -177,3 +177,33 @@ Stage Summary:
 - Professionals: kitchen detail background + critical copywriting fix + new detail image
 - Zone: Complete redesign with interactive SVG France map, blue glow effects, two-column layout with cross-highlighting
 ---
+Task ID: 7
+Agent: Main Agent
+Task: UX optimization and premium elevation - Round 2
+
+Work Log:
+- **Header**: Added blurred background effect (bg-white/10 backdrop-blur-md) when not scrolled, instead of transparent. This makes the menu text more readable over the hero image
+- **Header**: Changed "URGENCE 24/7" to "URGENCE" in both desktop and mobile emergency buttons
+- **Prestations**: Reduced background image opacity from 0.15 to 0.07 for much more transparency
+- **Prestations**: Replaced Inspection Camera card image with /pipe-inspection-cam.png (AI-generated pipeline inspection camera)
+- **Inspection**: Replaced image with /pipe-inspection-cam.png (real pipeline inspection camera)
+- **Inspection**: Removed "Focus Technique" label text
+- **Professionals**: Removed "Cible B2B" label text
+- **Professionals**: Replaced image with /clean-kitchen-pipes.png (AI-generated clean pipes in professional kitchen)
+- **Zone**: Complete rewrite - removed department list, replaced with descriptive text on the right side
+- **Zone**: France SVG map with proper department positions (cx/cy), hover tooltips, glow effects
+- **Zone**: Added transparent background image (water-tech-bg.png at 6% opacity) with gradient overlay instead of white
+- **Zone**: Descriptive text includes: zone description, 4 benefit cards, nationwide coverage mention, CTA link
+- **Contact**: Replaced background with water-tech-bg.png at 6% opacity + gradient overlay (from-[#f5f9ff] via-white to-[#f0f4ff])
+- Generated 2 new AI images: pipe-inspection-cam.png, clean-kitchen-pipes.png
+
+Stage Summary:
+- All user-requested UX changes implemented
+- Header now has blurred background for readability
+- Prestations background much more transparent
+- New pipeline inspection camera image in both Prestations card and Inspection section
+- "Focus Technique" and "Cible B2B" labels removed
+- Zone section completely redesigned with France map + descriptive text (no department list)
+- Both Zone and Contact sections have subtle background instead of plain white
+- ESLint passed clean, dev server compiling successfully
+---

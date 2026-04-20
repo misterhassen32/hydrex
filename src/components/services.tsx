@@ -30,7 +30,7 @@ const services = [
     title: 'Inspection caméra',
     description:
       'Diagnostic de précision par inspection vidéo de vos canalisations. Nos caméras HD repèrent fissures, déformations et intrusions. Un rapport vidéo détaillé vous est remis après chaque intervention.',
-    image: '/svc-inspection.png',
+    image: '/pipe-inspection-cam.png',
   },
   {
     icon: Truck,
@@ -74,7 +74,7 @@ export function Services() {
     >
       {/* Immersive Section Background Image */}
       <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.07]"
         style={{ backgroundImage: "url('/water-tech-bg.png')" }}
       />
 

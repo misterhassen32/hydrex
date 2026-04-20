@@ -34,8 +34,8 @@ export default function Inspection() {
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl hover:-translate-y-2 transition-transform duration-500">
               <Image
-                src="/inspection-cam-detail.png"
-                alt="Inspection caméra haute définition HYDREX - tête de caméra dans canalisation"
+                src="/pipe-inspection-cam.png"
+                alt="Inspection caméra haute définition HYDREX - caméra d'inspection dans canalisation"
                 width={640}
                 height={480}
                 className="w-full h-auto object-cover"
@@ -59,15 +59,7 @@ export default function Inspection() {
             transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
             className="order-1 lg:order-2"
           >
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-[#1976d2] font-semibold text-sm uppercase tracking-wider mb-3"
-            >
-              Focus Technique
-            </motion.p>
+
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#0a2540] mb-2">
               Inspection Caméra
             </h2>

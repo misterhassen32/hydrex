@@ -159,12 +159,12 @@ export default function Contact() {
 
   return (
     <section id="contact" className="relative py-20 overflow-hidden">
-      {/* Background image with white overlay */}
+      {/* Background image with high transparency */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-8"
-        style={{ backgroundImage: "url('/contact-center.png')" }}
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.06]"
+        style={{ backgroundImage: "url('/water-tech-bg.png')" }}
       />
-      <div className="absolute inset-0 bg-white/92" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#f5f9ff] via-white to-[#f0f4ff]" />
 
       {/* Content */}
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">

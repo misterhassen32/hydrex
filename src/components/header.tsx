@@ -60,7 +60,7 @@ export default function Header() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
           ? 'glass shadow-lg shadow-hydrex-deep/5'
-          : 'bg-transparent'
+          : 'bg-white/10 backdrop-blur-md'
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -145,7 +145,7 @@ export default function Header() {
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent shimmer" />
                   <Phone className="size-4 mr-2 animate-pulse" />
-                  <span className="text-xs sm:text-sm">URGENCE 24/7 : 07 77 72 05 12</span>
+                  <span className="text-xs sm:text-sm">URGENCE : 07 77 72 05 12</span>
                 </Button>
               </a>
             </motion.div>
@@ -243,7 +243,7 @@ export default function Header() {
                           <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent shimmer" />
                           <Phone className="size-5 mr-2.5 animate-pulse" />
                           <div className="flex flex-col items-start">
-                            <span className="text-xs font-semibold opacity-90">URGENCE 24/7</span>
+                            <span className="text-xs font-semibold opacity-90">URGENCE</span>
                             <span className="text-sm font-bold">07 77 72 05 12</span>
                           </div>
                         </Button>
