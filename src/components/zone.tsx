@@ -109,16 +109,13 @@ export default function Zone() {
             <div className="rounded-2xl p-4 sm:p-6 md:p-8">
               {/* Map container — no border, clean */}
               <div className="relative w-full aspect-[449/506]">
-                {/* Real France map image — with CSS filter to soften/remove the black outline */}
+                {/* Real France map image — contrast to thicken the border, no gray background */}
                 <img
                   src="/france-map.png"
                   alt="Carte de France"
-                  className="w-full h-auto select-none opacity-50 brightness-[2] contrast-[0.6] saturate-0"
+                  className="w-full h-auto select-none contrast-[2.5]"
                   draggable={false}
                 />
-
-                {/* Subtle overlay tint */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#e3f2fd]/40 to-[#bbdefb]/20 rounded-lg pointer-events-none" />
 
                 {/* Department markers overlay */}
                 {departments.map((dept) => {
