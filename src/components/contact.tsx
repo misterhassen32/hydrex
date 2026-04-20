@@ -5,8 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Send, Phone, Mail, MapPin, Clock, Loader2, ChevronRight } from 'lucide-react'
-import { toast } from 'sonner'
+import { Send, Phone, Mail, MapPin, Clock, Loader2, ChevronRight, CheckCircle2, AlertCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -73,59 +72,7 @@ const contactInfo = [
   },
 ]
 
-const DESTINATION_EMAIL = 'misterhassen32@gmail.com'
-
-function buildMailtoLink(data: ContactFormValues): string {
-  const prestationLabel = prestationOptions.find(o => o.value === data.prestation)?.label || data.prestation
-  const subject = encodeURIComponent(`Demande de devis - ${prestationLabel} - ${data.nom}`)
-  const body = encodeURIComponent(
-    `Nouvelle demande de devis :\n\n` +
-    `Nom : ${data.nom}\n` +
-    `Email : ${data.email}\n` +
-    `Téléphone : ${data.telephone}\n` +
-    `Prestation souhaitée : ${prestationLabel}\n\n` +
-    `Message :\n${data.message}\n\n` +
-    `---\nEnvoyé depuis le site HYDREX`
-  )
-  return `mailto:${DESTINATION_EMAIL}?subject=${subject}&body=${body}`
-}
-
-/**
- * Send email directly from the browser via FormSubmit.co
- * This is a client-side request, so it bypasses server-side Cloudflare blocks
- * First submission requires email confirmation (one-time)
- */
-async function sendViaFormSubmit(data: ContactFormValues): Promise<boolean> {
-  try {
-    const prestationLabel = prestationOptions.find(o => o.value === data.prestation)?.label || data.prestation
-
-    const formData = new FormData()
-    formData.append('nom', data.nom)
-    formData.append('email', data.email)
-    formData.append('telephone', data.telephone)
-    formData.append('prestation', prestationLabel)
-    formData.append('message', data.message)
-    formData.append('_subject', `🔹 Nouvelle demande de devis — ${prestationLabel} — ${data.nom}`)
-    formData.append('_template', 'table')
-    formData.append('_captcha', 'false')
-
-    const response = await fetch(`https://formsubmit.co/ajax/${DESTINATION_EMAIL}`, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'Accept': 'application/json',
-      },
-    })
-
-    if (response.ok) {
-      const result = await response.json()
-      return result.success === true || result.message === 'Email was sent successfully'
-    }
-    return false
-  } catch {
-    return false
-  }
-}
+const WEB3FORMS_KEY = '8275c86a-b55b-40a9-b268-89fbb5154708'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -148,6 +95,8 @@ const itemVariants = {
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
@@ -162,47 +111,61 @@ export default function Contact() {
 
   async function onSubmit(data: ContactFormValues) {
     setIsSubmitting(true)
+    setSubmitSuccess(false)
+    setSubmitError('')
+
+    const prestationLabel = prestationOptions.find(o => o.value === data.prestation)?.label || data.prestation
+    const web3Payload = {
+      access_key: WEB3FORMS_KEY,
+      subject: `Nouveau Devis HYDREX - ${prestationLabel}`,
+      from_name: 'Site Web HYDREX',
+      nom: data.nom,
+      email: data.email,
+      telephone: data.telephone,
+      prestation: prestationLabel,
+      message: data.message,
+    }
+
     try {
-      const response = await fetch('/api/contact', {
+      // Strategy 1: Try Web3Forms directly from browser (best for production)
+      try {
+        const directResponse = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(web3Payload),
+        })
+
+        const directResult = await directResponse.json()
+        if (directResult.success) {
+          setSubmitSuccess(true)
+          form.reset()
+          setTimeout(() => setSubmitSuccess(false), 8000)
+          return
+        }
+      } catch {
+        // Direct Web3Forms failed (CORS, network, etc.) — try proxy
+      }
+
+      // Strategy 2: Proxy through our API route (saves to DB + sends via Web3Forms)
+      const proxyResponse = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
 
-      if (response.ok) {
-        const result = await response.json()
-        if (result.emailSent) {
-          // Email was sent via SMTP — fully automatic
-          toast.success('Demande envoyée avec succès !', {
-            description: 'Nous vous recontacterons dans les plus brefs délais.',
-          })
-          form.reset()
-        } else {
-          // Data saved but email couldn't be sent — fall back to mailto
-          const mailtoLink = buildMailtoLink(data)
-          window.location.href = mailtoLink
-          toast.info('Votre client email va s\'ouvrir...', {
-            description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le pour finaliser votre demande.',
-          })
-          form.reset()
-        }
-      } else {
-        // API error — fall back to mailto
-        const mailtoLink = buildMailtoLink(data)
-        window.location.href = mailtoLink
-        toast.info('Votre client email va s\'ouvrir...', {
-          description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le pour finaliser votre demande.',
-        })
+      const proxyResult = await proxyResponse.json()
+
+      if (proxyResult.emailSent) {
+        setSubmitSuccess(true)
         form.reset()
+        setTimeout(() => setSubmitSuccess(false), 8000)
+        return
       }
+
+      // All methods failed
+      setSubmitError(proxyResult.error || 'Impossible d\'envoyer l\'email. Veuillez nous contacter par téléphone au 07 77 72 05 12.')
     } catch {
-      // Network error — fall back to mailto
-      const mailtoLink = buildMailtoLink(data)
-      window.location.href = mailtoLink
-      toast.info('Votre client email va s\'ouvrir...', {
-        description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le pour finaliser votre demande.',
-        })
-      form.reset()
+      setSubmitError('Erreur réseau. Veuillez vérifier votre connexion et réessayer.')
     } finally {
       setIsSubmitting(false)
     }
@@ -385,6 +348,32 @@ export default function Contact() {
                       </>
                     )}
                   </Button>
+
+                  {/* Success message — blue premium under the button */}
+                  {submitSuccess && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-2.5 bg-[#e3f2fd] border border-[#90caf9]/50 rounded-xl px-4 py-3"
+                    >
+                      <CheckCircle2 className="h-5 w-5 text-[#0d47a1] flex-shrink-0" />
+                      <p className="text-[#0d47a1] font-semibold text-sm">
+                        Message envoyé avec succès !
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* Error message */}
+                  {submitError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
+                    >
+                      <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <p className="text-red-700 text-sm font-medium">{submitError}</p>
+                    </motion.div>
+                  )}
                 </form>
               </Form>
             </div>
