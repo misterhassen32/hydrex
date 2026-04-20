@@ -57,7 +57,7 @@ export default function Zone() {
 
   return (
     <section id="zone-intervention" className="py-20 md:py-28 relative overflow-hidden">
-      {/* Transparent background */}
+      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.05]"
         style={{ backgroundImage: "url('/water-tech-bg.png')" }}
@@ -106,16 +106,19 @@ export default function Zone() {
             transition={{ duration: 0.7, ease: 'easeOut' }}
             className="relative"
           >
-            <div className="bg-gradient-to-br from-[#f5f9ff] to-[#e3f2fd] rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl border border-[#e3f2fd]/80">
-              {/* Map container with relative positioning for overlays */}
+            <div className="rounded-2xl p-4 sm:p-6 md:p-8">
+              {/* Map container — no border, clean */}
               <div className="relative w-full aspect-[449/506]">
-                {/* Real France map image */}
+                {/* Real France map image — with CSS filter to soften/remove the black outline */}
                 <img
                   src="/france-map.png"
                   alt="Carte de France"
-                  className="w-full h-auto select-none"
+                  className="w-full h-auto select-none opacity-50 brightness-[2] contrast-[0.6] saturate-0"
                   draggable={false}
                 />
+
+                {/* Subtle overlay tint */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#e3f2fd]/40 to-[#bbdefb]/20 rounded-lg pointer-events-none" />
 
                 {/* Department markers overlay */}
                 {departments.map((dept) => {
@@ -123,7 +126,7 @@ export default function Zone() {
                   return (
                     <div
                       key={dept.number}
-                      className="absolute cursor-pointer group"
+                      className="absolute cursor-pointer"
                       style={{
                         left: `${dept.left}%`,
                         top: `${dept.top}%`,
@@ -132,49 +135,36 @@ export default function Zone() {
                       onMouseEnter={() => setHoveredDept(dept.number)}
                       onMouseLeave={() => setHoveredDept(null)}
                     >
-                      {/* Pulse ring animation */}
+                      {/* Subtle pulse ring — always visible */}
                       <div
-                        className={`absolute inset-0 rounded-full transition-all duration-500 ${
+                        className={`absolute rounded-full transition-all duration-500 ease-out ${
                           isHovered
-                            ? 'bg-[#42a5f5]/30 scale-[2.5]'
-                            : 'bg-[#1976d2]/20 scale-[1.8]'
+                            ? 'bg-[#42a5f5]/20 scale-[3.5]'
+                            : 'bg-[#1976d2]/10 scale-[2]'
                         }`}
                         style={{
-                          width: '40px',
-                          height: '40px',
+                          width: '10px',
+                          height: '10px',
                           top: '50%',
                           left: '50%',
-                          marginTop: '-20px',
-                          marginLeft: '-20px',
+                          marginTop: '-5px',
+                          marginLeft: '-5px',
                         }}
                       />
 
-                      {/* Glow effect on hover */}
+                      {/* Main marker dot — small, grows on hover */}
                       <div
-                        className={`absolute rounded-full transition-all duration-300 ${
+                        className={`relative z-10 flex items-center justify-center rounded-full transition-all duration-300 ease-out ${
                           isHovered
-                            ? 'bg-[#42a5f5]/25 scale-[3]'
-                            : 'bg-transparent scale-[1]'
-                        }`}
-                        style={{
-                          width: '60px',
-                          height: '60px',
-                          top: '50%',
-                          left: '50%',
-                          marginTop: '-30px',
-                          marginLeft: '-30px',
-                        }}
-                      />
-
-                      {/* Main marker dot */}
-                      <div
-                        className={`relative z-10 flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
-                          isHovered
-                            ? 'w-11 h-11 bg-[#42a5f5] border-[#64b5f6] shadow-lg shadow-[#42a5f5]/50'
-                            : 'w-9 h-9 bg-[#1976d2] border-[#0d47a1] shadow-md shadow-[#1976d2]/30'
+                            ? 'w-9 h-9 bg-[#42a5f5] shadow-lg shadow-[#42a5f5]/40 scale-110'
+                            : 'w-6 h-6 bg-[#1976d2] shadow-md shadow-[#1976d2]/25'
                         }`}
                       >
-                        <span className="text-white font-extrabold text-sm select-none">
+                        <span
+                          className={`text-white font-bold select-none transition-all duration-300 ${
+                            isHovered ? 'text-[11px]' : 'text-[9px]'
+                          }`}
+                        >
                           {dept.number}
                         </span>
                       </div>
@@ -182,7 +172,7 @@ export default function Zone() {
                       {/* Tooltip on hover */}
                       {isHovered && (
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-20 pointer-events-none">
-                          <div className="bg-[#0a2540] text-white rounded-xl px-4 py-2.5 shadow-xl whitespace-nowrap">
+                          <div className="bg-[#0a2540]/95 backdrop-blur-sm text-white rounded-lg px-3.5 py-2 shadow-xl whitespace-nowrap border border-white/10">
                             <p className="font-bold text-sm">
                               {dept.number} — {dept.name}
                             </p>
@@ -191,7 +181,7 @@ export default function Zone() {
                             </p>
                           </div>
                           {/* Tooltip arrow */}
-                          <div className="w-3 h-3 bg-[#0a2540] rotate-45 mx-auto -mt-1.5" />
+                          <div className="w-2.5 h-2.5 bg-[#0a2540]/95 rotate-45 mx-auto -mt-1.5 border-r border-b border-white/10" />
                         </div>
                       )}
                     </div>
@@ -200,14 +190,14 @@ export default function Zone() {
               </div>
             </div>
 
-            {/* Map legend */}
-            <div className="flex items-center justify-center gap-6 mt-4 text-xs text-[#0a2540]/60">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-[#1976d2] border border-[#0d47a1]" />
+            {/* Map legend — minimal */}
+            <div className="flex items-center justify-center gap-5 mt-2 text-[11px] text-[#0a2540]/50">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#1976d2]" />
                 <span>Départements couverts</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-[#42a5f5] border border-[#64b5f6] shadow-sm shadow-[#42a5f5]/50" />
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#42a5f5] shadow-sm shadow-[#42a5f5]/50" />
                 <span>Survolez pour découvrir</span>
               </div>
             </div>
