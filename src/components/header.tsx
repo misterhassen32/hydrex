@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -35,6 +35,23 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const handleNavClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault()
+      const id = href.replace('#', '')
+      const element = document.getElementById(id)
+
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+
+      if (mobileOpen) {
+        setMobileOpen(false)
+      }
+    },
+    [mobileOpen]
+  )
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -53,12 +70,12 @@ export default function Header() {
             <motion.div
               whileHover={{ rotate: 15, scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="relative h-10 w-10 lg:h-11 lg:w-11"
             >
               <Image
-                src="/logo.svg"
+                src="/logo.png"
                 alt="HYDREX Logo"
-                fill
+                width={44}
+                height={44}
                 className="object-contain"
                 priority
               />
@@ -94,9 +111,10 @@ export default function Header() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index + 0.3, duration: 0.4 }}
               >
-                <Link
+                <a
                   href={link.href}
-                  className={`relative px-3.5 py-2 text-sm font-medium transition-colors duration-300 rounded-lg group ${
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className={`relative px-3.5 py-2 text-sm font-medium transition-colors duration-300 rounded-lg group cursor-pointer ${
                     scrolled
                       ? 'text-hydrex-deep/80 hover:text-hydrex-ocean hover:bg-hydrex-light/50'
                       : 'text-white/85 hover:text-white hover:bg-white/10'
@@ -106,7 +124,7 @@ export default function Header() {
                   <span
                     className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-hydrex-azur transition-all duration-300 w-0 group-hover:w-3/4`}
                   />
-                </Link>
+                </a>
               </motion.div>
             ))}
           </nav>
@@ -173,14 +191,13 @@ export default function Header() {
                     {/* Mobile Sheet Header */}
                     <SheetHeader className="p-6 pb-4 border-b border-hydrex-light bg-gradient-to-br from-hydrex-deep to-hydrex-ocean">
                       <SheetTitle className="flex items-center gap-3 text-white">
-                        <div className="relative h-10 w-10">
-                          <Image
-                            src="/logo.svg"
-                            alt="HYDREX"
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
+                        <Image
+                          src="/logo.png"
+                          alt="HYDREX"
+                          width={40}
+                          height={40}
+                          className="object-contain"
+                        />
                         <div className="flex flex-col">
                           <span className="text-lg font-extrabold tracking-wider">HYDREX</span>
                           <span className="text-[10px] font-medium tracking-[0.15em] uppercase text-hydrex-sky">
@@ -200,18 +217,17 @@ export default function Header() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.05 * index + 0.2, duration: 0.3 }}
                           >
-                            <SheetClose asChild>
-                              <Link
-                                href={link.href}
-                                className="flex items-center justify-between px-4 py-3.5 rounded-xl text-hydrex-deep font-medium transition-all duration-200 hover:bg-hydrex-light hover:text-hydrex-ocean group"
-                              >
-                                <span className="flex items-center gap-3">
-                                  <Droplets className="size-4 text-hydrex-azur opacity-60 group-hover:opacity-100 transition-opacity" />
-                                  {link.label}
-                                </span>
-                                <ChevronRight className="size-4 text-hydrex-sky/50 group-hover:text-hydrex-azur group-hover:translate-x-0.5 transition-all" />
-                              </Link>
-                            </SheetClose>
+                            <a
+                              href={link.href}
+                              onClick={(e) => handleNavClick(e, link.href)}
+                              className="flex items-center justify-between px-4 py-3.5 rounded-xl text-hydrex-deep font-medium transition-all duration-200 hover:bg-hydrex-light hover:text-hydrex-ocean group cursor-pointer"
+                            >
+                              <span className="flex items-center gap-3">
+                                <Droplets className="size-4 text-hydrex-azur opacity-60 group-hover:opacity-100 transition-opacity" />
+                                {link.label}
+                              </span>
+                              <ChevronRight className="size-4 text-hydrex-sky/50 group-hover:text-hydrex-azur group-hover:translate-x-0.5 transition-all" />
+                            </a>
                           </motion.li>
                         ))}
                       </ul>

@@ -13,8 +13,16 @@ const features = [
 
 export default function Inspection() {
   return (
-    <section id="inspection-camera" className="py-20 md:py-28 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="inspection-camera" className="py-20 md:py-28 bg-white relative overflow-hidden">
+      {/* Fiber optic background with dark overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
+        style={{ backgroundImage: "url('/fiber-optic-bg.png')" }}
+      />
+      {/* Solid white overlay on top */}
+      <div className="absolute inset-0 bg-white/95" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Image — left on desktop, second on mobile */}
           <motion.div
@@ -24,10 +32,10 @@ export default function Inspection() {
             transition={{ duration: 0.7, ease: 'easeOut' }}
             className="order-2 lg:order-1 relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl hover:-translate-y-2 transition-transform duration-500">
               <Image
-                src="/inspection-camera.png"
-                alt="Inspection caméra haute définition HYDREX"
+                src="/inspection-cam-detail.png"
+                alt="Inspection caméra haute définition HYDREX - tête de caméra dans canalisation"
                 width={640}
                 height={480}
                 className="w-full h-auto object-cover"

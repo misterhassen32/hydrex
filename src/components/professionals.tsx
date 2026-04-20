@@ -24,8 +24,19 @@ const stats = [
 
 export default function Professionals() {
   return (
-    <section id="professionnels" className="py-20 md:py-28 bg-[#f5f9ff]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="professionnels" className="py-20 md:py-28 bg-[#f5f9ff] relative overflow-hidden">
+      {/* Kitchen detail background - subtle blurred */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.08]"
+        style={{
+          backgroundImage: "url('/pro-kitchen-detail.png')",
+          filter: 'blur(2px)',
+        }}
+      />
+      {/* Solid overlay */}
+      <div className="absolute inset-0 bg-[#f5f9ff]/95" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Text — left on desktop */}
           <motion.div
@@ -63,8 +74,7 @@ export default function Professionals() {
                 de vos réseaux d&apos;évacuation, conformément aux normes en vigueur.
               </p>
               <p>
-                Notre <strong className="text-[#0a2540]">réactivité absolue</strong> vous garantit
-                de ne jamais subir de fermeture imprévue. Et grâce à nos{' '}
+                Notre <strong className="text-[#0a2540]">réactivité absolue</strong> et nos protocoles préventifs limitent drastiquement les risques d&apos;immobilisation de votre établissement. Et grâce à nos{' '}
                 <strong className="text-[#0a2540]">contrats d&apos;entretien personnalisés</strong>,
                 vous bénéficiez d&apos;un suivi sur mesure à tarif préférentiel.
               </p>
@@ -122,7 +132,7 @@ export default function Professionals() {
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
               <Image
-                src="/restaurant-kitchen.png"
+                src="/pro-kitchen-detail.png"
                 alt="Cuisine de restaurant professionnel entretenue par HYDREX"
                 width={640}
                 height={480}

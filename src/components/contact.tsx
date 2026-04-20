@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Send, Phone, Mail, MapPin, Clock, Loader2 } from 'lucide-react'
+import { Send, Phone, Mail, MapPin, Clock, Loader2, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -61,7 +61,7 @@ const contactInfo = [
   },
   {
     icon: MapPin,
-    label: 'Zone d\'intervention',
+    label: "Zone d'intervention",
     value: 'Sud de la France',
     href: null,
   },
@@ -72,6 +72,21 @@ const contactInfo = [
     href: null,
   },
 ]
+
+function buildMailtoLink(data: ContactFormValues): string {
+  const prestationLabel = prestationOptions.find(o => o.value === data.prestation)?.label || data.prestation
+  const subject = encodeURIComponent(`Demande de devis - ${prestationLabel} - ${data.nom}`)
+  const body = encodeURIComponent(
+    `Nouvelle demande de devis :\n\n` +
+    `Nom : ${data.nom}\n` +
+    `Email : ${data.email}\n` +
+    `Téléphone : ${data.telephone}\n` +
+    `Prestation souhaitée : ${prestationLabel}\n\n` +
+    `Message :\n${data.message}\n\n` +
+    `---\nEnvoyé depuis le site HYDREX`
+  )
+  return `mailto:misterhassen32@gmail.com?subject=${subject}&body=${body}`
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -115,26 +130,44 @@ export default function Contact() {
         body: JSON.stringify(data),
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'envoi')
+      if (response.ok) {
+        toast.success('Demande envoyée avec succès !', {
+          description: 'Nous vous recontacterons dans les plus brefs délais.',
+        })
+        form.reset()
+      } else {
+        // API failed, use mailto fallback
+        const mailtoLink = buildMailtoLink(data)
+        window.location.href = mailtoLink
+        toast.info('Votre client email va s\'ouvrir...', {
+          description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le.',
+        })
+        form.reset()
       }
-
-      toast.success('Demande envoyée avec succès !', {
-        description: 'Nous vous recontacterons dans les plus brefs délais.',
+    } catch {
+      // Network error or other failure, use mailto fallback
+      const mailtoLink = buildMailtoLink(data)
+      window.location.href = mailtoLink
+      toast.info('Votre client email va s\'ouvrir...', {
+        description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le.',
       })
       form.reset()
-    } catch {
-      toast.error('Erreur lors de l\'envoi', {
-        description: 'Veuillez réessayer ou nous contacter directement par téléphone.',
-      })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <section id="contact" className="py-20 bg-hydrex-ice">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="contact" className="relative py-20 overflow-hidden">
+      {/* Background image with white overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-8"
+        style={{ backgroundImage: "url('/contact-center.png')" }}
+      />
+      <div className="absolute inset-0 bg-white/92" />
+
+      {/* Content */}
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -160,9 +193,12 @@ export default function Contact() {
         >
           {/* Form - 3 columns */}
           <motion.div variants={itemVariants} className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-hydrex-light/60">
+            <div className="relative bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-hydrex-light/40 overflow-hidden">
+              {/* Gradient accent bar on the left */}
+              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-hydrex-ocean via-hydrex-azur to-hydrex-sky rounded-l-2xl" />
+
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 pl-2">
                   {/* Nom */}
                   <FormField
                     control={form.control}
@@ -175,7 +211,7 @@ export default function Contact() {
                         <FormControl>
                           <Input
                             placeholder="Votre nom complet"
-                            className="h-11 border-hydrex-light focus:border-hydrex-azur focus:ring-hydrex-azur/20"
+                            className="h-11 border-hydrex-light/80 focus:border-hydrex-azur focus:ring-hydrex-azur/20 shadow-sm transition-shadow focus:shadow-md"
                             {...field}
                           />
                         </FormControl>
@@ -198,7 +234,7 @@ export default function Contact() {
                             <Input
                               type="email"
                               placeholder="votre@email.fr"
-                              className="h-11 border-hydrex-light focus:border-hydrex-azur focus:ring-hydrex-azur/20"
+                              className="h-11 border-hydrex-light/80 focus:border-hydrex-azur focus:ring-hydrex-azur/20 shadow-sm transition-shadow focus:shadow-md"
                               {...field}
                             />
                           </FormControl>
@@ -219,7 +255,7 @@ export default function Contact() {
                             <Input
                               type="tel"
                               placeholder="06 00 00 00 00"
-                              className="h-11 border-hydrex-light focus:border-hydrex-azur focus:ring-hydrex-azur/20"
+                              className="h-11 border-hydrex-light/80 focus:border-hydrex-azur focus:ring-hydrex-azur/20 shadow-sm transition-shadow focus:shadow-md"
                               {...field}
                             />
                           </FormControl>
@@ -240,7 +276,7 @@ export default function Contact() {
                         </FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <SelectTrigger className="h-11 w-full border-hydrex-light focus:border-hydrex-azur focus:ring-hydrex-azur/20">
+                            <SelectTrigger className="h-11 w-full border-hydrex-light/80 focus:border-hydrex-azur focus:ring-hydrex-azur/20 shadow-sm transition-shadow focus:shadow-md">
                               <SelectValue placeholder="Choisissez une prestation" />
                             </SelectTrigger>
                           </FormControl>
@@ -270,7 +306,7 @@ export default function Contact() {
                           <Textarea
                             placeholder="Décrivez votre besoin..."
                             rows={5}
-                            className="border-hydrex-light focus:border-hydrex-azur focus:ring-hydrex-azur/20 resize-none"
+                            className="border-hydrex-light/80 focus:border-hydrex-azur focus:ring-hydrex-azur/20 resize-none shadow-sm transition-shadow focus:shadow-md"
                             {...field}
                           />
                         </FormControl>
@@ -279,11 +315,11 @@ export default function Contact() {
                     )}
                   />
 
-                  {/* Submit */}
+                  {/* Submit - Premium gradient button */}
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full h-12 bg-hydrex-ocean hover:bg-hydrex-azur text-white font-semibold text-base transition-colors duration-200 rounded-lg"
+                    className="w-full h-12 bg-gradient-to-r from-hydrex-ocean to-hydrex-azur hover:from-hydrex-azur hover:to-hydrex-ocean text-white font-semibold text-base transition-all duration-300 rounded-lg shadow-lg shadow-hydrex-ocean/25 hover:shadow-xl hover:shadow-hydrex-azur/30 hover:scale-[1.01] active:scale-[0.99] group"
                   >
                     {isSubmitting ? (
                       <>
@@ -292,8 +328,9 @@ export default function Contact() {
                       </>
                     ) : (
                       <>
-                        <Send className="mr-2 h-5 w-5" />
+                        <Send className="mr-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         Envoyer ma demande
+                        <ChevronRight className="ml-1 h-4 w-4 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />
                       </>
                     )}
                   </Button>
@@ -304,7 +341,7 @@ export default function Contact() {
 
           {/* Contact Info - 2 columns */}
           <motion.div variants={itemVariants} className="lg:col-span-2">
-            <div className="bg-hydrex-deep rounded-2xl shadow-lg p-6 sm:p-8 text-white h-full flex flex-col justify-between">
+            <div className="bg-hydrex-deep rounded-2xl shadow-xl p-6 sm:p-8 text-white h-full flex flex-col justify-between border border-white/5">
               <div>
                 <h3 className="text-2xl font-bold mb-2">Nos coordonnées</h3>
                 <p className="text-white/70 mb-8">

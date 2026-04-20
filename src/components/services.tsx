@@ -1,8 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Droplets, Gauge, Waves, Camera, Container } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Droplets, Gauge, Waves, Camera, Truck } from 'lucide-react'
 
 const services = [
   {
@@ -10,30 +9,35 @@ const services = [
     title: 'Débouchage et nettoyage de canalisations',
     description:
       'Intervention rapide pour déboucher et nettoyer vos canalisations. Nous éliminons les obstructions les plus tenaces et restaurons un écoulement optimal, quel que soit le diamètre ou le type de réseau.',
+    image: '/svc-debouchage.png',
   },
   {
     icon: Gauge,
     title: 'Hydrocurage haute pression',
     description:
       'Nettoyage en profondeur par camion haute pression jusqu\'à 200 bars. L\'hydrocurage élimine tartre, graisses, boues et racines pour redonner toute sa capacité à vos canalisations.',
+    image: '/svc-hydrocurage.png',
   },
   {
     icon: Waves,
     title: 'Curage réseaux EU/EP',
     description:
       'Curage spécialisé des réseaux d\'eaux usées (EU) et eaux pluviales (EP). Nous assurons l\'entretien complet de vos collecteurs, regard et ouvrages pour prévenir les inondations et les pollutions.',
+    image: '/svc-curage.png',
   },
   {
     icon: Camera,
     title: 'Inspection caméra',
     description:
       'Diagnostic de précision par inspection vidéo de vos canalisations. Nos caméras HD repèrent fissures, déformations et intrusions. Un rapport vidéo détaillé vous est remis après chaque intervention.',
+    image: '/svc-inspection.png',
   },
   {
-    icon: Container,
+    icon: Truck,
     title: 'Pompage',
     description:
       'Service de pompage complet : fosses septiques, bacs à graisses, puisards et regards. Vidange, curage et traitement des effluents dans le respect des normes environnementales en vigueur.',
+    image: '/svc-pompage.png',
   },
 ]
 
@@ -65,10 +69,16 @@ export function Services() {
   return (
     <section
       id="prestations"
-      className="py-20 md:py-28"
-      style={{ backgroundColor: '#f5f9ff' }}
+      className="relative overflow-hidden py-20 md:py-28"
+      style={{ backgroundColor: '#0a1628' }}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Immersive Section Background Image */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15"
+        style={{ backgroundImage: "url('/water-tech-bg.png')" }}
+      />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-14 text-center md:mb-20">
           <motion.h2
@@ -77,7 +87,7 @@ export function Services() {
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.5 }}
             className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl"
-            style={{ color: '#0d47a1' }}
+            style={{ color: '#90caf9' }}
           >
             Nos Prestations
           </motion.h2>
@@ -94,7 +104,7 @@ export function Services() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground md:text-lg"
+            className="mx-auto mt-6 max-w-2xl text-base text-blue-200/70 md:text-lg"
           >
             Des solutions professionnelles pour l&apos;entretien et la maintenance
             de vos réseaux d&apos;assainissement.
@@ -113,36 +123,37 @@ export function Services() {
             const Icon = service.icon
             return (
               <motion.div key={service.title} variants={cardVariants}>
-                <Card
-                  className="group relative h-full cursor-default overflow-hidden border border-white/60 bg-white/70 py-8 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/80 hover:bg-white/90 hover:shadow-xl hover:shadow-[#1976d2]/10"
-                >
-                  <CardContent className="flex flex-col items-center text-center">
-                    {/* Icon Circle */}
-                    <div
-                      className="mb-5 flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110"
-                      style={{ backgroundColor: '#e3f2fd' }}
-                    >
+                <div className="group relative h-full cursor-default overflow-hidden rounded-2xl transition-all duration-500 hover:scale-105">
+                  {/* Background Image */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-125"
+                    style={{ backgroundImage: `url('${service.image}')` }}
+                  />
+
+                  {/* Dark Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-black/40 transition-all duration-500 group-hover:from-black/60 group-hover:via-black/40 group-hover:to-black/20" />
+
+                  {/* Content */}
+                  <div className="relative z-10 flex flex-col items-center px-6 py-10 text-center">
+                    {/* Icon Circle - color inversion on hover */}
+                    <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#1976d2] transition-all duration-500 group-hover:bg-white">
                       <Icon
-                        className="h-8 w-8"
-                        style={{ color: '#1976d2' }}
+                        className="h-8 w-8 text-white transition-all duration-500 group-hover:text-[#1976d2]"
                         strokeWidth={1.8}
                       />
                     </div>
 
                     {/* Title */}
-                    <h3
-                      className="mb-3 text-lg font-bold leading-snug"
-                      style={{ color: '#0d47a1' }}
-                    >
+                    <h3 className="mb-3 text-lg font-bold leading-snug text-white md:text-xl">
                       {service.title}
                     </h3>
 
                     {/* Description */}
-                    <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+                    <p className="text-sm leading-relaxed text-blue-100/80 md:text-base">
                       {service.description}
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </motion.div>
             )
           })}

@@ -78,7 +78,7 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="flex flex-col sm:flex-row gap-4"
           >
-            <a href="#contact">
+            <a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}>
               <Button
                 size="lg"
                 className="group relative overflow-hidden bg-[#1976d2] hover:bg-[#42a5f5] text-white font-bold rounded-xl px-8 h-14 text-base shadow-xl shadow-[#1976d2]/30 transition-all duration-300 hover:shadow-2xl hover:shadow-[#1976d2]/40"
@@ -134,7 +134,7 @@ export default function Hero() {
         >
           <path
             d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-            fill="#f5f9ff"
+            fill="#0a1628"
           />
         </svg>
       </div>

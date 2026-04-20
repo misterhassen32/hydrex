@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Phone, Mail, MapPin, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -31,7 +32,14 @@ export default function Footer() {
         >
           {/* Column 1: Logo & Description */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <div className="mb-5">
+            <div className="mb-5 flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="HYDREX"
+                width={36}
+                height={36}
+                className="object-contain"
+              />
               <span className="text-2xl font-bold tracking-tight">
                 <span className="text-hydrex-sky">HYD</span>REX
               </span>
