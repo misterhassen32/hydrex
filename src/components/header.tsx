@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useSyncExternalStore } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -12,7 +12,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetClose,
 } from '@/components/ui/sheet'
 
 const navLinks = [
@@ -23,17 +22,17 @@ const navLinks = [
   { label: 'Contact', href: '#contact' },
 ]
 
+const emptySubscribe = () => () => {}
+
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  // Use useSyncExternalStore to safely read scroll position without SSR mismatch
+  const scrolled = useSyncExternalStore(
+    emptySubscribe,
+    () => window.scrollY > 20,
+    () => false // SSR value
+  )
 
   const handleNavClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -53,36 +52,30 @@ export default function Header() {
   )
 
   return (
-    <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+    <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
           ? 'glass shadow-lg shadow-hydrex-deep/5'
-          : 'bg-white/10 backdrop-blur-md'
+          : 'bg-hydrex-deep/80 backdrop-blur-md'
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-18 items-center justify-between lg:h-20">
+        <div className="flex h-16 items-center justify-between sm:h-18 lg:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <motion.div
-              whileHover={{ rotate: 15, scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            >
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group z-10">
+            <div className="transition-transform duration-300 group-hover:rotate-[15deg] group-hover:scale-105">
               <Image
                 src="/logo-icon.png"
                 alt="HYDREX Logo"
-                width={48}
-                height={35}
-                className="object-contain drop-shadow-sm"
+                width={40}
+                height={30}
+                className="object-contain drop-shadow-sm sm:!w-[48px] sm:!h-[35px]"
                 priority
               />
-            </motion.div>
+            </div>
             <div className="flex flex-col">
               <span
-                className={`text-xl font-extrabold tracking-wider transition-colors duration-300 lg:text-2xl ${
+                className={`text-lg font-extrabold tracking-wider transition-colors duration-300 sm:text-xl lg:text-2xl ${
                   scrolled
                     ? 'text-hydrex-deep'
                     : 'text-white'
@@ -91,7 +84,7 @@ export default function Header() {
                 HYDREX
               </span>
               <span
-                className={`text-[10px] font-medium tracking-[0.2em] uppercase transition-colors duration-300 lg:text-[11px] ${
+                className={`text-[8px] font-medium tracking-[0.15em] uppercase transition-colors duration-300 sm:text-[10px] lg:text-[11px] ${
                   scrolled
                     ? 'text-hydrex-ocean'
                     : 'text-hydrex-sky'
@@ -104,40 +97,29 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link, index) => (
-              <motion.div
+            {navLinks.map((link) => (
+              <a
                 key={link.href}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index + 0.3, duration: 0.4 }}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                className={`relative px-3.5 py-2 text-sm font-medium transition-colors duration-300 rounded-lg group cursor-pointer ${
+                  scrolled
+                    ? 'text-hydrex-deep/80 hover:text-hydrex-ocean hover:bg-hydrex-light/50'
+                    : 'text-white/85 hover:text-white hover:bg-white/10'
+                }`}
               >
-                <a
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  className={`relative px-3.5 py-2 text-sm font-medium transition-colors duration-300 rounded-lg group cursor-pointer ${
-                    scrolled
-                      ? 'text-hydrex-deep/80 hover:text-hydrex-ocean hover:bg-hydrex-light/50'
-                      : 'text-white/85 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {link.label}
-                  <span
-                    className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-hydrex-azur transition-all duration-300 w-0 group-hover:w-3/4`}
-                  />
-                </a>
-              </motion.div>
+                {link.label}
+                <span
+                  className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-hydrex-azur transition-all duration-300 w-0 group-hover:w-3/4`}
+                />
+              </a>
             ))}
           </nav>
 
           {/* Emergency CTA + Mobile Menu */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 z-10">
             {/* Emergency Button - Desktop */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8, duration: 0.4 }}
-              className="hidden lg:block"
-            >
+            <div className="hidden lg:block">
               <a href="tel:+33777720512">
                 <Button
                   className="pulse-urgent relative overflow-hidden bg-hydrex-urgent hover:bg-hydrex-urgent/90 text-white font-bold rounded-full px-5 h-11 shadow-lg shadow-hydrex-urgent/25 transition-all duration-300 hover:shadow-xl hover:shadow-hydrex-urgent/30"
@@ -148,15 +130,10 @@ export default function Header() {
                   <span className="text-xs sm:text-sm">URGENCE : 07 77 72 05 12</span>
                 </Button>
               </a>
-            </motion.div>
+            </div>
 
             {/* Emergency Button - Mobile (compact) */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6, duration: 0.4 }}
-              className="lg:hidden"
-            >
+            <div className="lg:hidden">
               <a href="tel:+33777720512">
                 <Button
                   className="pulse-urgent bg-hydrex-urgent hover:bg-hydrex-urgent/90 text-white rounded-full px-3 h-9 shadow-lg shadow-hydrex-urgent/25"
@@ -166,7 +143,7 @@ export default function Header() {
                   <span className="text-[11px] font-bold">URGENCE</span>
                 </Button>
               </a>
-            </motion.div>
+            </div>
 
             {/* Mobile Menu Trigger */}
             <div className="lg:hidden">
@@ -175,7 +152,7 @@ export default function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`rounded-lg transition-colors duration-300 ${
+                    className={`rounded-lg transition-colors duration-300 min-w-[44px] min-h-[44px] ${
                       scrolled
                         ? 'text-hydrex-deep hover:bg-hydrex-light/50'
                         : 'text-white hover:bg-white/10'
@@ -189,18 +166,18 @@ export default function Header() {
                 <SheetContent side="right" className="w-[85vw] sm:max-w-md p-0 bg-white">
                   <div className="flex flex-col h-full">
                     {/* Mobile Sheet Header */}
-                    <SheetHeader className="p-6 pb-4 border-b border-hydrex-light bg-gradient-to-br from-hydrex-deep to-hydrex-ocean">
+                    <SheetHeader className="p-5 sm:p-6 pb-4 border-b border-hydrex-light bg-gradient-to-br from-hydrex-deep to-hydrex-ocean">
                       <SheetTitle className="flex items-center gap-3 text-white">
                         <Image
                           src="/logo-icon.png"
                           alt="HYDREX"
-                          width={44}
-                          height={32}
+                          width={40}
+                          height={30}
                           className="object-contain drop-shadow-sm"
                         />
                         <div className="flex flex-col">
                           <span className="text-lg font-extrabold tracking-wider">HYDREX</span>
-                          <span className="text-[10px] font-medium tracking-[0.15em] uppercase text-hydrex-sky">
+                          <span className="text-[9px] font-medium tracking-[0.15em] uppercase text-hydrex-sky">
                             Hydrocurage & Assainissement
                           </span>
                         </div>
@@ -210,13 +187,8 @@ export default function Header() {
                     {/* Mobile Navigation Links */}
                     <nav className="flex-1 overflow-y-auto py-4">
                       <ul className="space-y-1 px-3">
-                        {navLinks.map((link, index) => (
-                          <motion.li
-                            key={link.href}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.05 * index + 0.2, duration: 0.3 }}
-                          >
+                        {navLinks.map((link) => (
+                          <li key={link.href}>
                             <a
                               href={link.href}
                               onClick={(e) => handleNavClick(e, link.href)}
@@ -228,7 +200,7 @@ export default function Header() {
                               </span>
                               <ChevronRight className="size-4 text-hydrex-sky/50 group-hover:text-hydrex-azur group-hover:translate-x-0.5 transition-all" />
                             </a>
-                          </motion.li>
+                          </li>
                         ))}
                       </ul>
                     </nav>
@@ -273,6 +245,6 @@ export default function Header() {
           />
         )}
       </AnimatePresence>
-    </motion.header>
+    </header>
   )
 }
