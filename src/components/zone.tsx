@@ -4,79 +4,78 @@ import { motion } from 'framer-motion'
 import { Globe, Phone, Clock, Shield, Truck, MapPin } from 'lucide-react'
 import { useState } from 'react'
 
-// Detailed France outline path (realistic hexagonal shape with Brittany, Normandy, etc.)
-const francePath = 'M188,8 L198,2 L212,0 L226,2 L240,6 L254,8 L264,14 L274,22 L284,32 L292,44 L298,56 L304,66 L310,72 L320,76 L330,74 L340,70 L350,72 L356,80 L360,90 L358,102 L354,112 L350,122 L352,134 L358,146 L362,156 L360,168 L356,178 L354,188 L356,198 L362,210 L368,222 L370,234 L366,246 L362,256 L364,268 L370,278 L374,290 L372,302 L368,312 L370,324 L372,336 L368,348 L362,358 L354,366 L348,374 L342,382 L334,390 L324,396 L314,400 L304,404 L294,406 L284,408 L274,410 L264,412 L254,414 L244,416 L234,416 L224,414 L214,412 L204,408 L194,406 L184,402 L174,396 L164,390 L156,382 L148,372 L140,362 L134,350 L128,338 L122,326 L116,312 L110,298 L104,284 L100,270 L96,256 L90,242 L86,228 L82,214 L80,200 L78,186 L76,172 L78,158 L82,144 L86,130 L90,116 L96,104 L104,92 L112,82 L120,72 L128,62 L138,52 L148,44 L158,36 L168,28 L178,18 Z'
+// Accurate France outline traced from real geographic coordinates
+// Projection: x = (lon+5.5)*42, y = (51.2-lat)*63, viewBox 600x580
+// Going clockwise from Dunkirk
+const francePath = 'M330,10 L305,18 L280,55 L265,80 L235,100 L210,82 L180,68 L155,58 L148,70 L152,88 L140,118 L105,135 L70,148 L42,175 L58,200 L85,215 L130,240 L160,248 L152,278 L175,310 L188,348 L182,395 L172,438 L165,478 L185,498 L215,512 L245,520 L275,518 L310,525 L345,540 L352,510 L368,498 L392,480 L415,485 L440,495 L458,500 L478,512 L510,495 L535,478 L542,462 L548,445 L535,422 L518,405 L505,392 L478,378 L486,340 L490,318 L482,295 L498,272 L515,238 L535,218 L555,192 L562,168 L568,140 L542,128 L512,116 L480,105 L450,95 L428,85 L405,68 L378,42 L358,28 Z'
 
-// Brittany peninsula extension
-const brittanyPath = 'M80,200 L72,198 L62,200 L52,204 L44,210 L38,218 L34,228 L32,238 L34,248 L40,256 L48,260 L56,258 L64,252 L72,244 L78,234 L82,224 L82,214 Z'
+// Brittany peninsula (separate path to create proper peninsula shape)
+const brittanyPath = 'M140,118 L125,108 L108,112 L92,120 L78,130 L65,142 L55,155 L48,168 L42,175 L58,200 L85,215 L105,210 L120,205 L135,195 L145,180 L150,165 L148,148 L145,132 Z'
 
-// Corsica
-const corsicaPath = 'M384,380 L388,374 L392,376 L394,384 L392,394 L388,402 L384,408 L380,410 L376,406 L374,398 L376,390 L380,384 Z'
+// Corsica island
+const corsicaPath = 'M548,490 L552,482 L558,478 L562,484 L560,496 L555,510 L550,520 L545,525 L540,518 L540,508 L542,498 Z'
 
-// Department paths with accurate geographic positioning
+// Departments with correct geographic positioning in the SE of France
+// Slightly enlarged for visibility and interactivity
 const departments = [
   {
     number: '34',
     name: 'Hérault',
     capital: 'Montpellier',
-    cx: 256,
-    cy: 332,
-    path: 'M238,312 L248,304 L260,302 L272,306 L280,314 L284,326 L282,340 L276,352 L266,360 L254,364 L242,360 L234,352 L230,340 L232,326 Z',
+    cx: 385,
+    cy: 492,
+    path: 'M368,475 L380,468 L395,470 L408,478 L412,492 L406,506 L394,512 L380,510 L370,500 L366,488 Z',
   },
   {
     number: '30',
     name: 'Gard',
     capital: 'Nîmes',
-    cx: 292,
-    cy: 308,
-    path: 'M272,290 L284,284 L298,286 L310,294 L318,306 L320,320 L316,334 L306,342 L294,344 L282,340 L276,328 L274,314 L272,302 Z',
+    cx: 422,
+    cy: 472,
+    path: 'M408,458 L422,450 L438,455 L450,465 L454,480 L448,495 L435,502 L420,498 L410,488 L406,472 Z',
   },
   {
     number: '84',
     name: 'Vaucluse',
     capital: 'Avignon',
-    cx: 310,
-    cy: 270,
-    path: 'M294,252 L308,246 L322,250 L334,260 L340,274 L336,288 L326,298 L312,300 L300,296 L292,284 L290,270 Z',
+    cx: 448,
+    cy: 438,
+    path: 'M432,422 L448,415 L465,420 L475,432 L478,448 L470,462 L456,468 L440,465 L430,452 L428,436 Z',
   },
   {
     number: '11',
     name: 'Aude',
     capital: 'Carcassonne',
-    cx: 218,
-    cy: 338,
-    path: 'M200,318 L212,310 L226,308 L238,312 L242,324 L240,338 L236,352 L226,362 L214,366 L202,360 L194,350 L190,336 Z',
+    cx: 352,
+    cy: 510,
+    path: 'M332,498 L348,490 L368,494 L378,506 L374,520 L362,530 L346,534 L332,526 L325,512 Z',
   },
   {
     number: '66',
     name: 'Pyrénées-Orientales',
     capital: 'Perpignan',
-    cx: 186,
-    cy: 370,
-    path: 'M170,350 L184,342 L200,340 L210,350 L214,364 L210,380 L202,394 L190,404 L178,408 L166,402 L158,390 L156,376 L160,362 Z',
+    cx: 325,
+    cy: 538,
+    path: 'M308,528 L322,520 L342,524 L354,535 L350,550 L338,560 L322,558 L308,548 L304,538 Z',
   },
   {
     number: '13',
     name: 'Bouches-du-Rhône',
     capital: 'Marseille',
-    cx: 338,
-    cy: 332,
-    path: 'M320,312 L334,304 L348,308 L360,318 L368,332 L366,348 L358,360 L346,368 L332,370 L320,364 L312,352 L310,338 L314,324 Z',
+    cx: 468,
+    cy: 498,
+    path: 'M454,485 L468,478 L485,482 L498,492 L502,508 L494,522 L480,528 L465,524 L454,512 L450,498 Z',
   },
 ]
 
-// Major city markers for geographic reference
+// Reference cities on the map
 const cities = [
-  { name: 'Paris', x: 262, y: 82, isDept: false },
-  { name: 'Lyon', x: 310, y: 208, isDept: false },
-  { name: 'Toulouse', x: 190, y: 284, isDept: false },
-  { name: 'Bordeaux', x: 130, y: 260, isDept: false },
-  { name: 'Marseille', x: 340, y: 348, isDept: true },
-  { name: 'Montpellier', x: 256, y: 348, isDept: true },
-  { name: 'Nîmes', x: 292, y: 322, isDept: true },
-  { name: 'Avignon', x: 312, y: 282, isDept: true },
-  { name: 'Perpignan', x: 186, y: 382, isDept: true },
-  { name: 'Carcassonne', x: 218, y: 352, isDept: true },
+  { name: 'Paris', x: 338, y: 148, isDept: false },
+  { name: 'Lyon', x: 460, y: 340, isDept: false },
+  { name: 'Toulouse', x: 240, y: 415, isDept: false },
+  { name: 'Bordeaux', x: 200, y: 385, isDept: false },
+  { name: 'Strasbourg', x: 558, y: 170, isDept: false },
+  { name: 'Rennes', x: 115, y: 185, isDept: false },
 ]
 
 export default function Zone() {
@@ -136,14 +135,14 @@ export default function Zone() {
           >
             <div className="bg-gradient-to-br from-[#f5f9ff] to-[#e3f2fd] rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl border border-[#e3f2fd]/80">
               <svg
-                viewBox="0 0 420 440"
+                viewBox="0 0 600 580"
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-full h-auto"
                 role="img"
                 aria-label="Carte de France avec les départements d'intervention HYDREX"
               >
                 <defs>
-                  <filter id="glow-default" x="-40%" y="-40%" width="180%" height="180%">
+                  <filter id="glow-def" x="-40%" y="-40%" width="180%" height="180%">
                     <feGaussianBlur stdDeviation="3" result="blur" />
                     <feFlood floodColor="#1976d2" floodOpacity="0.45" result="color" />
                     <feComposite in="color" in2="blur" operator="in" result="shadow" />
@@ -153,7 +152,7 @@ export default function Zone() {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
-                  <filter id="glow-hover" x="-60%" y="-60%" width="220%" height="220%">
+                  <filter id="glow-hov" x="-60%" y="-60%" width="220%" height="220%">
                     <feGaussianBlur stdDeviation="6" result="blur" />
                     <feFlood floodColor="#42a5f5" floodOpacity="0.75" result="color" />
                     <feComposite in="color" in2="blur" operator="in" result="shadow" />
@@ -164,26 +163,27 @@ export default function Zone() {
                       <feMergeNode in="SourceGraphic" />
                     </feMerge>
                   </filter>
-                  <filter id="france-shadow" x="-3%" y="-3%" width="106%" height="106%">
+                  <filter id="map-shadow" x="-3%" y="-3%" width="106%" height="106%">
                     <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#0a2540" floodOpacity="0.06" />
                   </filter>
                 </defs>
 
-                {/* France mainland outline */}
+                {/* France mainland */}
                 <path
                   d={francePath}
                   fill="white"
-                  stroke="#c5cae9"
-                  strokeWidth="1.5"
-                  filter="url(#france-shadow)"
+                  stroke="#b0bec5"
+                  strokeWidth="2"
+                  filter="url(#map-shadow)"
+                  strokeLinejoin="round"
                 />
 
-                {/* Brittany peninsula */}
+                {/* Brittany peninsula overlay (fills the gap) */}
                 <path
                   d={brittanyPath}
                   fill="white"
-                  stroke="#c5cae9"
-                  strokeWidth="1.5"
+                  stroke="#b0bec5"
+                  strokeWidth="2"
                   strokeLinejoin="round"
                 />
 
@@ -191,42 +191,31 @@ export default function Zone() {
                 <path
                   d={corsicaPath}
                   fill="white"
-                  stroke="#c5cae9"
-                  strokeWidth="1.2"
+                  stroke="#b0bec5"
+                  strokeWidth="1.5"
                 />
-                <text x="384" y="418" textAnchor="middle" fill="#90caf9" fontSize="7" fontStyle="italic" fontFamily="Inter, sans-serif">Corse</text>
+                <text x="550" y="535" textAnchor="middle" fill="#90caf9" fontSize="8" fontStyle="italic" fontFamily="Inter, sans-serif">Corse</text>
 
-                {/* Subtle region boundary lines for context */}
-                <g opacity="0.08" stroke="#78909c" strokeWidth="0.5" fill="none">
-                  <path d="M90,140 Q200,138 355,144" />
-                  <path d="M80,200 Q190,196 360,204" />
-                  <path d="M70,260 Q180,256 365,264" />
-                  <path d="M90,310 Q195,306 370,314" />
-                  <path d="M180,50 Q176,200 184,400" />
-                  <path d="M260,30 Q258,180 266,380" />
-                  <path d="M330,60 Q328,190 336,370" />
-                </g>
-
-                {/* Major non-dept cities - subtle markers */}
-                {cities.filter(c => !c.isDept).map(city => (
+                {/* Reference cities */}
+                {cities.map(city => (
                   <g key={city.name}>
-                    <circle cx={city.x} cy={city.y} r="2.5" fill="#0a2540" opacity="0.2" />
+                    <circle cx={city.x} cy={city.y} r="3" fill="#0a2540" opacity="0.15" />
                     <text
                       x={city.x}
-                      y={city.y - 8}
+                      y={city.y - 9}
                       textAnchor="middle"
                       fill="#0a2540"
-                      fontSize="7"
-                      fontWeight="500"
+                      fontSize="8"
+                      fontWeight="600"
                       fontFamily="Inter, sans-serif"
-                      opacity="0.3"
+                      opacity="0.35"
                     >
                       {city.name}
                     </text>
                   </g>
                 ))}
 
-                {/* Highlighted department zones */}
+                {/* Department zones */}
                 {departments.map((dept) => {
                   const isHovered = hoveredDept === dept.number
                   return (
@@ -235,8 +224,8 @@ export default function Zone() {
                         d={dept.path}
                         fill={isHovered ? '#42a5f5' : '#1976d2'}
                         stroke={isHovered ? '#64b5f6' : '#0d47a1'}
-                        strokeWidth={isHovered ? '2' : '1.2'}
-                        filter={isHovered ? 'url(#glow-hover)' : 'url(#glow-default)'}
+                        strokeWidth={isHovered ? '2.5' : '1.5'}
+                        filter={isHovered ? 'url(#glow-hov)' : 'url(#glow-def)'}
                         style={{
                           cursor: 'pointer',
                           transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -251,13 +240,10 @@ export default function Zone() {
                         textAnchor="middle"
                         dominantBaseline="central"
                         fill="white"
-                        fontSize="12"
+                        fontSize="14"
                         fontWeight="800"
                         fontFamily="Inter, sans-serif"
-                        style={{
-                          pointerEvents: 'none',
-                          transition: 'all 0.35s ease',
-                        }}
+                        style={{ pointerEvents: 'none' }}
                       >
                         {dept.number}
                       </text>
@@ -265,44 +251,29 @@ export default function Zone() {
                   )
                 })}
 
-                {/* Dept city markers */}
-                {cities.filter(c => c.isDept).map(city => (
-                  <g key={city.name}>
-                    <circle
-                      cx={city.x}
-                      cy={city.y}
-                      r="2"
-                      fill="white"
-                      stroke="#0d47a1"
-                      strokeWidth="0.8"
-                      opacity="0.7"
-                    />
-                  </g>
-                ))}
-
-                {/* Hover tooltip - simple conditional, no AnimatePresence */}
+                {/* Hover tooltip */}
                 {hoveredInfo && (
                   <g>
                     <rect
-                      x={hoveredInfo.cx - 72}
-                      y={hoveredInfo.cy - 55}
-                      width="144"
-                      height="40"
+                      x={hoveredInfo.cx - 78}
+                      y={hoveredInfo.cy - 60}
+                      width="156"
+                      height="42"
                       rx="8"
                       fill="#0a2540"
                       opacity="0.95"
                     />
                     <polygon
-                      points={`${hoveredInfo.cx - 5},${hoveredInfo.cy - 15} ${hoveredInfo.cx + 5},${hoveredInfo.cy - 15} ${hoveredInfo.cx},${hoveredInfo.cy - 9}`}
+                      points={`${hoveredInfo.cx - 5},${hoveredInfo.cy - 18} ${hoveredInfo.cx + 5},${hoveredInfo.cy - 18} ${hoveredInfo.cx},${hoveredInfo.cy - 12}`}
                       fill="#0a2540"
                       opacity="0.95"
                     />
                     <text
                       x={hoveredInfo.cx}
-                      y={hoveredInfo.cy - 38}
+                      y={hoveredInfo.cy - 42}
                       textAnchor="middle"
                       fill="white"
-                      fontSize="11"
+                      fontSize="12"
                       fontWeight="700"
                       fontFamily="Inter, sans-serif"
                     >
@@ -310,10 +281,10 @@ export default function Zone() {
                     </text>
                     <text
                       x={hoveredInfo.cx}
-                      y={hoveredInfo.cy - 23}
+                      y={hoveredInfo.cy - 26}
                       textAnchor="middle"
                       fill="#42a5f5"
-                      fontSize="9"
+                      fontSize="10"
                       fontWeight="500"
                       fontFamily="Inter, sans-serif"
                     >
@@ -324,42 +295,56 @@ export default function Zone() {
 
                 {/* Mediterranean Sea */}
                 <text
-                  x="290"
-                  y="424"
+                  x="420"
+                  y="565"
                   textAnchor="middle"
                   fill="#90caf9"
-                  fontSize="9"
+                  fontSize="10"
                   fontStyle="italic"
                   fontFamily="Inter, sans-serif"
                   opacity="0.7"
                 >
                   Méditerranée
                 </text>
-                <path d="M220,416 Q240,410 260,416 Q280,422 300,416 Q320,410 340,416" fill="none" stroke="#bbdefb" strokeWidth="0.8" opacity="0.4" />
-                <path d="M230,426 Q250,420 270,426 Q290,432 310,426 Q330,420 350,426" fill="none" stroke="#bbdefb" strokeWidth="0.6" opacity="0.25" />
+                <path d="M320,558 Q360,550 400,558 Q440,566 480,558 Q520,550 540,558" fill="none" stroke="#bbdefb" strokeWidth="1" opacity="0.4" />
 
                 {/* Dotted zone boundary */}
                 <path
-                  d="M158,370 Q155,338 170,318 Q188,300 218,290 Q250,282 282,280 Q314,282 340,290 Q364,300 370,326 Q372,356 360,370 Q344,386 322,396 Q290,406 254,410 Q218,410 192,400 Q166,390 158,370 Z"
+                  d="M304,540 Q295,510 310,490 Q330,470 365,462 Q400,458 435,460 Q470,465 498,480 Q515,492 510,510 Q502,530 485,540 Q460,552 425,555 Q385,558 350,555 Q325,552 304,540 Z"
                   fill="none"
                   stroke="#42a5f5"
-                  strokeWidth="1.2"
-                  strokeDasharray="4 4"
+                  strokeWidth="1.5"
+                  strokeDasharray="5 5"
                   opacity="0.3"
                 />
 
-                {/* HYDREX zone label */}
+                {/* Atlantic label */}
                 <text
-                  x="260"
-                  y="296"
+                  x="30"
+                  y="330"
                   textAnchor="middle"
-                  fill="#0d47a1"
-                  fontSize="8"
-                  fontWeight="700"
+                  fill="#90caf9"
+                  fontSize="9"
+                  fontStyle="italic"
                   fontFamily="Inter, sans-serif"
-                  opacity="0.2"
+                  opacity="0.5"
+                  transform="rotate(-90, 30, 330)"
                 >
-                  ZONE HYDREX
+                  Atlantique
+                </text>
+
+                {/* Manche label */}
+                <text
+                  x="200"
+                  y="42"
+                  textAnchor="middle"
+                  fill="#90caf9"
+                  fontSize="9"
+                  fontStyle="italic"
+                  fontFamily="Inter, sans-serif"
+                  opacity="0.4"
+                >
+                  Manche
                 </text>
               </svg>
             </div>
@@ -377,7 +362,7 @@ export default function Zone() {
             </div>
           </motion.div>
 
-          {/* Descriptive text - right side */}
+          {/* Descriptive text */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -385,7 +370,6 @@ export default function Zone() {
             transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
             className="flex flex-col gap-7"
           >
-            {/* Zone description */}
             <div>
               <h3 className="text-2xl font-bold text-[#0a2540] mb-4">
                 Notre zone d&apos;intervention principale
@@ -409,7 +393,6 @@ export default function Zone() {
               </p>
             </div>
 
-            {/* Key benefits */}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-[#e3f2fd] hover:shadow-md transition-shadow">
                 <div className="w-9 h-9 rounded-lg bg-[#e3f2fd] flex items-center justify-center flex-shrink-0">
@@ -449,7 +432,6 @@ export default function Zone() {
               </div>
             </div>
 
-            {/* Nationwide mention */}
             <div className="bg-gradient-to-r from-[#0a2540] to-[#0d47a1] rounded-2xl p-6 text-white relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#42a5f5]/10 rounded-full blur-2xl" />
               <div className="relative flex items-start gap-4">
@@ -468,7 +450,6 @@ export default function Zone() {
               </div>
             </div>
 
-            {/* CTA */}
             <a
               href="#contact"
               className="inline-flex items-center gap-2 bg-[#0d47a1] hover:bg-[#0a2540] text-white font-semibold px-6 py-3.5 rounded-xl transition-colors shadow-lg shadow-[#0d47a1]/20 group"
