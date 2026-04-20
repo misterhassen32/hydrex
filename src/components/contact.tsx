@@ -115,55 +115,32 @@ export default function Contact() {
     setSubmitError('')
 
     const prestationLabel = prestationOptions.find(o => o.value === data.prestation)?.label || data.prestation
-    const web3Payload = {
-      access_key: WEB3FORMS_KEY,
-      subject: `Nouveau Devis HYDREX - ${prestationLabel}`,
-      from_name: 'Site Web HYDREX',
-      nom: data.nom,
-      email: data.email,
-      telephone: data.telephone,
-      prestation: prestationLabel,
-      message: data.message,
-    }
 
     try {
-      // Strategy 1: Try Web3Forms directly from browser (best for production)
-      try {
-        const directResponse = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(web3Payload),
-        })
-
-        const directResult = await directResponse.json()
-        if (directResult.success) {
-          setSubmitSuccess(true)
-          form.reset()
-          setTimeout(() => setSubmitSuccess(false), 8000)
-          return
-        }
-      } catch {
-        // Direct Web3Forms failed (CORS, network, etc.) — try proxy
-      }
-
-      // Strategy 2: Proxy through our API route (saves to DB + sends via Web3Forms)
-      const proxyResponse = await fetch('/api/contact', {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          subject: `Nouveau Devis HYDREX - ${prestationLabel}`,
+          from_name: 'Site Web HYDREX',
+          nom: data.nom,
+          email: data.email,
+          telephone: data.telephone,
+          prestation: prestationLabel,
+          message: data.message,
+        }),
       })
 
-      const proxyResult = await proxyResponse.json()
+      const result = await response.json()
 
-      if (proxyResult.emailSent) {
+      if (result.success) {
         setSubmitSuccess(true)
         form.reset()
         setTimeout(() => setSubmitSuccess(false), 8000)
-        return
+      } else {
+        setSubmitError('Impossible d\'envoyer le message. Veuillez nous contacter par téléphone au 07 77 72 05 12.')
       }
-
-      // All methods failed
-      setSubmitError(proxyResult.error || 'Impossible d\'envoyer l\'email. Veuillez nous contacter par téléphone au 07 77 72 05 12.')
     } catch {
       setSubmitError('Erreur réseau. Veuillez vérifier votre connexion et réessayer.')
     } finally {
