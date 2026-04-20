@@ -73,6 +73,8 @@ const contactInfo = [
   },
 ]
 
+const DESTINATION_EMAIL = 'misterhassen32@gmail.com'
+
 function buildMailtoLink(data: ContactFormValues): string {
   const prestationLabel = prestationOptions.find(o => o.value === data.prestation)?.label || data.prestation
   const subject = encodeURIComponent(`Demande de devis - ${prestationLabel} - ${data.nom}`)
@@ -85,7 +87,44 @@ function buildMailtoLink(data: ContactFormValues): string {
     `Message :\n${data.message}\n\n` +
     `---\nEnvoyé depuis le site HYDREX`
   )
-  return `mailto:misterhassen32@gmail.com?subject=${subject}&body=${body}`
+  return `mailto:${DESTINATION_EMAIL}?subject=${subject}&body=${body}`
+}
+
+/**
+ * Send email directly from the browser via FormSubmit.co
+ * This is a client-side request, so it bypasses server-side Cloudflare blocks
+ * First submission requires email confirmation (one-time)
+ */
+async function sendViaFormSubmit(data: ContactFormValues): Promise<boolean> {
+  try {
+    const prestationLabel = prestationOptions.find(o => o.value === data.prestation)?.label || data.prestation
+
+    const formData = new FormData()
+    formData.append('nom', data.nom)
+    formData.append('email', data.email)
+    formData.append('telephone', data.telephone)
+    formData.append('prestation', prestationLabel)
+    formData.append('message', data.message)
+    formData.append('_subject', `🔹 Nouvelle demande de devis — ${prestationLabel} — ${data.nom}`)
+    formData.append('_template', 'table')
+    formData.append('_captcha', 'false')
+
+    const response = await fetch(`https://formsubmit.co/ajax/${DESTINATION_EMAIL}`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
+
+    if (response.ok) {
+      const result = await response.json()
+      return result.success === true || result.message === 'Email was sent successfully'
+    }
+    return false
+  } catch {
+    return false
+  }
 }
 
 const containerVariants = {
@@ -131,26 +170,38 @@ export default function Contact() {
       })
 
       if (response.ok) {
-        toast.success('Demande envoyée avec succès !', {
-          description: 'Nous vous recontacterons dans les plus brefs délais.',
-        })
-        form.reset()
+        const result = await response.json()
+        if (result.emailSent) {
+          // Email was sent via SMTP — fully automatic
+          toast.success('Demande envoyée avec succès !', {
+            description: 'Nous vous recontacterons dans les plus brefs délais.',
+          })
+          form.reset()
+        } else {
+          // Data saved but email couldn't be sent — fall back to mailto
+          const mailtoLink = buildMailtoLink(data)
+          window.location.href = mailtoLink
+          toast.info('Votre client email va s\'ouvrir...', {
+            description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le pour finaliser votre demande.',
+          })
+          form.reset()
+        }
       } else {
-        // API failed, use mailto fallback
+        // API error — fall back to mailto
         const mailtoLink = buildMailtoLink(data)
         window.location.href = mailtoLink
         toast.info('Votre client email va s\'ouvrir...', {
-          description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le.',
+          description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le pour finaliser votre demande.',
         })
         form.reset()
       }
     } catch {
-      // Network error or other failure, use mailto fallback
+      // Network error — fall back to mailto
       const mailtoLink = buildMailtoLink(data)
       window.location.href = mailtoLink
       toast.info('Votre client email va s\'ouvrir...', {
-        description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le.',
-      })
+        description: 'Vérifiez que l\'email est bien pré-rempli et envoyez-le pour finaliser votre demande.',
+        })
       form.reset()
     } finally {
       setIsSubmitting(false)

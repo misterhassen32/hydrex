@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import nodemailer from 'nodemailer'
 import { db } from '@/lib/db'
 
 const contactSchema = z.object({
@@ -10,10 +11,24 @@ const contactSchema = z.object({
   message: z.string().min(1, 'Le message est requis'),
 })
 
+const DESTINATION_EMAIL = 'misterhassen32@gmail.com'
+const GMAIL_USER = 'misterhassen32@gmail.com'
+const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || ''
+
+const prestationLabels: Record<string, string> = {
+  debouchage: 'Débouchage',
+  hydrocurage: 'Hydrocurage',
+  'curage-eu-ep': 'Curage EU/EP',
+  'inspection-camera': 'Inspection caméra',
+  pompage: 'Pompage',
+  autre: 'Autre',
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const validatedData = contactSchema.parse(body)
+    const prestationLabel = prestationLabels[validatedData.prestation] || validatedData.prestation
 
     // Save to database
     const submission = await db.contactSubmission.create({
@@ -26,16 +41,26 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Attempt to send email notification
-    try {
-      await sendEmailNotification(validatedData)
-    } catch (emailError) {
-      // Log email error but don't fail the request - data is saved in DB
-      console.error('Email notification failed:', emailError)
+    // Try Gmail SMTP (works if GMAIL_APP_PASSWORD env var is configured)
+    if (GMAIL_APP_PASSWORD) {
+      const smtpSent = await sendViaGmailSMTP(validatedData, prestationLabel)
+      if (smtpSent) {
+        return NextResponse.json(
+          { success: true, id: submission.id, emailSent: true },
+          { status: 201 }
+        )
+      }
     }
 
+    // SMTP not available — tell client to use FormSubmit from browser
     return NextResponse.json(
-      { success: true, id: submission.id },
+      {
+        success: true,
+        id: submission.id,
+        emailSent: false,
+        prestationLabel,
+        message: 'Donnée sauvegardée. Envoi email via le navigateur.',
+      },
       { status: 201 }
     )
   } catch (error) {
@@ -55,33 +80,69 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Send email notification using the LLM skill to compose and notify
- * In production, you would use a proper email service (SendGrid, Resend, etc.)
+ * Gmail SMTP — requires GMAIL_APP_PASSWORD environment variable
+ * Setup: Google Account → Security → 2-Step Verification → App passwords
  */
-async function sendEmailNotification(data: z.infer<typeof contactSchema>) {
-  // Email content that would be sent to misterhassen32@gmail.com
-  const emailContent = {
-    to: 'misterhassen32@gmail.com',
-    subject: `Nouvelle demande de devis - ${data.prestation} - ${data.nom}`,
-    body: `
-      Nouvelle demande de devis reçue :
+async function sendViaGmailSMTP(data: z.infer<typeof contactSchema>, prestationLabel: string): Promise<boolean> {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: GMAIL_USER,
+        pass: GMAIL_APP_PASSWORD,
+      },
+    })
 
-      Nom : ${data.nom}
-      Email : ${data.email}
-      Téléphone : ${data.telephone}
-      Prestation souhaitée : ${data.prestation}
-      
-      Message :
-      ${data.message}
+    await transporter.sendMail({
+      from: `"Site HYDREX" <${GMAIL_USER}>`,
+      to: DESTINATION_EMAIL,
+      replyTo: data.email,
+      subject: `🔹 Nouvelle demande de devis — ${prestationLabel} — ${data.nom}`,
+      html: buildEmailHTML(data, prestationLabel),
+    })
 
-      ---
-      Envoyé depuis le site HYDREX
-    `,
+    console.log('📧 Email envoyé via Gmail SMTP ✓')
+    return true
+  } catch (error) {
+    console.error('📧 Gmail SMTP échoué:', error)
+    return false
   }
+}
 
-  // Log the email content (in production, use a real email service)
-  console.log('📧 Email notification:', JSON.stringify(emailContent, null, 2))
-
-  // In production, replace this with actual email sending:
-  // await sendEmail(emailContent)
+function buildEmailHTML(data: z.infer<typeof contactSchema>, prestationLabel: string): string {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; overflow: hidden;">
+      <div style="background: linear-gradient(135deg, #0a2540, #0d47a1); padding: 24px 32px;">
+        <h1 style="color: white; margin: 0; font-size: 22px;">Nouvelle demande de devis</h1>
+        <p style="color: #42a5f5; margin: 4px 0 0; font-size: 14px;">Site HYDREX — Formulaire de contact</p>
+      </div>
+      <div style="padding: 28px 32px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 13px; width: 140px;">👤 Nom</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 15px; font-weight: 600;">${data.nom}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 13px;">📧 Email</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; color: #0d47a1; font-size: 15px; font-weight: 600;"><a href="mailto:${data.email}" style="color: #0d47a1;">${data.email}</a></td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 13px;">📱 Téléphone</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 15px; font-weight: 600;"><a href="tel:${data.telephone}" style="color: #0f172a;">${data.telephone}</a></td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 13px;">🔧 Prestation</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; color: #0f172a; font-size: 15px; font-weight: 600;">${prestationLabel}</td>
+          </tr>
+        </table>
+        <div style="margin-top: 20px; background: white; border-radius: 8px; padding: 16px 20px; border: 1px solid #e2e8f0;">
+          <p style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px;">Message</p>
+          <p style="color: #0f172a; font-size: 15px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${data.message}</p>
+        </div>
+      </div>
+      <div style="background: #f1f5f9; padding: 16px 32px; text-align: center;">
+        <p style="color: #94a3b8; font-size: 12px; margin: 0;">Envoyé depuis le formulaire de contact HYDREX</p>
+      </div>
+    </div>
+  `
 }
