@@ -237,3 +237,29 @@ Stage Summary:
 - Right side has descriptive text + benefits + nationwide mention (no department list)
 - Dev server compiling successfully
 ---
+Task ID: 9
+Agent: Main Agent
+Task: Replace hand-drawn France SVG with REAL France map image + department overlays
+
+Work Log:
+- User was extremely frustrated that hand-drawn SVG paths didn't look like France
+- User explicitly requested: "USE A REAL BLANK FRANCE MAP IMAGE AS BACKGROUND AND PLACE DEPARTMENTS ON IT"
+- Copied user's uploaded blank France outline map to /public/france-map.png
+- Completely rewrote /src/components/zone.tsx:
+  - Removed all hand-drawn SVG paths (francePath, brittanyPath, corsicaPath, department paths)
+  - Replaced with <img> element using the real France map image
+  - Department markers positioned absolutely using CSS percentage coordinates
+  - Each marker has: pulse ring animation, glow effect on hover, numbered circle
+  - Hover effect shows tooltip with department number, name, and capital
+  - Smooth CSS transitions for all hover states
+- Used VLM to verify rendering: confirmed real France map is visible with correctly positioned markers
+- Verified hover effect: tooltip appears with department info and glow animation
+- Passed lint check with no errors
+
+Stage Summary:
+- Real France map image (user-provided) now used instead of hand-drawn SVG
+- 6 department markers (34, 30, 84, 11, 66, 13) positioned correctly in SE France
+- Interactive hover effects with tooltips, glow, and pulse animations
+- Descriptive text, benefit cards, and nationwide coverage mention preserved on right side
+- Critical user frustration resolved - map now shows actual France outline
+---
