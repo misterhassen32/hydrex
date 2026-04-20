@@ -63,7 +63,7 @@ export default function Header() {
         <div className="flex h-16 items-center justify-between sm:h-18 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group z-10">
-            <div className="transition-transform duration-300 group-hover:rotate-[15deg] group-hover:scale-105">
+            <div>
               <Image
                 src="/logo-icon.png"
                 alt="HYDREX Logo"
