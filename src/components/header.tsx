@@ -56,7 +56,7 @@ export default function Header() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
           ? 'glass shadow-lg shadow-hydrex-deep/5'
-          : 'bg-hydrex-deep/30 backdrop-blur-sm'
+          : 'bg-[#06111f]/90 backdrop-blur-sm'
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -67,9 +67,9 @@ export default function Header() {
               <Image
                 src="/logo-icon.png"
                 alt="HYDREX Logo"
-                width={40}
-                height={30}
-                className="object-contain drop-shadow-sm sm:!w-[48px] sm:!h-[35px]"
+                width={48}
+                height={36}
+                className="object-contain drop-shadow-sm sm:!w-[56px] sm:!h-[42px]"
                 priority
               />
             </div>
