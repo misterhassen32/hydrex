@@ -88,7 +88,7 @@ export default function Hero() {
                 Demander un Devis
               </Button>
             </a>
-            <a href="tel:+33777720512">
+            <a href="tel:+33610521352">
               <Button
                 size="lg"
                 variant="outline"

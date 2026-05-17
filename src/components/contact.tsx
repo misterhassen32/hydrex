@@ -49,14 +49,14 @@ const contactInfo = [
   {
     icon: Phone,
     label: 'Téléphone',
-    value: '07 77 72 05 12',
-    href: 'tel:+33777720512',
+    value: '06 10 52 13 52',
+    href: 'tel:+33610521352',
   },
   {
     icon: Mail,
     label: 'Email',
-    value: 'contact@hydrex.fr',
-    href: 'mailto:contact@hydrex.fr',
+    value: 'contact@hydrex-assainissement.com',
+    href: 'mailto:contact@hydrex-assainissement.com',
   },
   {
     icon: MapPin,
@@ -139,7 +139,7 @@ export default function Contact() {
         form.reset()
         setTimeout(() => setSubmitSuccess(false), 8000)
       } else {
-        setSubmitError('Impossible d\'envoyer le message. Veuillez nous contacter par téléphone au 07 77 72 05 12.')
+        setSubmitError('Impossible d\'envoyer le message. Veuillez nous contacter par téléphone au 06 10 52 13 52.')
       }
     } catch {
       setSubmitError('Erreur réseau. Veuillez vérifier votre connexion et réessayer.')
@@ -396,7 +396,7 @@ export default function Contact() {
                   Intervention rapide 24h/24, 7j/7 pour tous vos problèmes d&apos;assainissement.
                 </p>
                 <a
-                  href="tel:+33777720512"
+                  href="tel:+33610521352"
                   className="inline-flex items-center gap-2 bg-hydrex-urgent hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors duration-200 pulse-urgent"
                 >
                   <Phone className="h-4 w-4" />

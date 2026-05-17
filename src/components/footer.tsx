@@ -13,8 +13,8 @@ const navigationLinks = [
 ]
 
 const coordonnees = [
-  { icon: Phone, label: '07 77 72 05 12', href: 'tel:+33777720512' },
-  { icon: Mail, label: 'contact@hydrex.fr', href: 'mailto:contact@hydrex.fr' },
+  { icon: Phone, label: '06 10 52 13 52', href: 'tel:+33610521352' },
+  { icon: Mail, label: 'contact@hydrex-assainissement.com', href: 'mailto:contact@hydrex-assainissement.com' },
   { icon: MapPin, label: 'Sud de la France', href: null },
   { icon: Clock, label: '24h/24, 7j/7', href: null },
 ]

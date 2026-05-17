@@ -120,21 +120,21 @@ export default function Header() {
           <div className="flex items-center gap-2 sm:gap-3 z-10">
             {/* Emergency Button - Desktop */}
             <div className="hidden lg:block">
-              <a href="tel:+33777720512">
+              <a href="tel:+33610521352">
                 <Button
                   className="pulse-urgent relative overflow-hidden bg-hydrex-urgent hover:bg-hydrex-urgent/90 text-white font-bold rounded-full px-5 h-11 shadow-lg shadow-hydrex-urgent/25 transition-all duration-300 hover:shadow-xl hover:shadow-hydrex-urgent/30"
                   size="lg"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent shimmer" />
                   <Phone className="size-4 mr-2 animate-pulse" />
-                  <span className="text-xs sm:text-sm">URGENCE : 07 77 72 05 12</span>
+                  <span className="text-xs sm:text-sm">URGENCE : 06 10 52 13 52</span>
                 </Button>
               </a>
             </div>
 
             {/* Emergency Button - Mobile (compact) */}
             <div className="lg:hidden">
-              <a href="tel:+33777720512">
+              <a href="tel:+33610521352">
                 <Button
                   className="pulse-urgent bg-hydrex-urgent hover:bg-hydrex-urgent/90 text-white rounded-full px-3 h-9 shadow-lg shadow-hydrex-urgent/25"
                   size="sm"
@@ -207,7 +207,7 @@ export default function Header() {
 
                     {/* Mobile Emergency Footer */}
                     <div className="p-4 border-t border-hydrex-light bg-hydrex-ice">
-                      <a href="tel:+33777720512" className="block">
+                      <a href="tel:+33610521352" className="block">
                         <Button
                           className="pulse-urgent w-full bg-hydrex-urgent hover:bg-hydrex-urgent/90 text-white font-bold rounded-xl h-12 shadow-lg shadow-hydrex-urgent/25 relative overflow-hidden"
                           size="lg"
@@ -216,7 +216,7 @@ export default function Header() {
                           <Phone className="size-5 mr-2.5 animate-pulse" />
                           <div className="flex flex-col items-start">
                             <span className="text-xs font-semibold opacity-90">URGENCE</span>
-                            <span className="text-sm font-bold">07 77 72 05 12</span>
+                            <span className="text-sm font-bold">06 10 52 13 52</span>
                           </div>
                         </Button>
                       </a>

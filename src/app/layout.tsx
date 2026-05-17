@@ -1,3 +1,4 @@
+import Script from "next/script";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "HYDREX" }],
   icons: {
-    icon: "/logo.svg",
+    icon: "/logo.png",
   },
   openGraph: {
     title: "HYDREX — L'excellence technique au service de vos réseaux",
@@ -55,6 +56,13 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased bg-background text-foreground`}>
+<Script async src="https://www.googletagmanager.com/gtag/js?id=AW-18166106985" strategy="afterInteractive" />
+<Script id="google-ads" strategy="afterInteractive">{`
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18166106985');
+`}</Script>
         {children}
         <Toaster position="top-right" richColors />
       </body>
